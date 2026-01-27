@@ -1,5 +1,3 @@
-import { Icon } from '@iconify/react';
-
 interface SystemStatusProps {
   status?: 'operational' | 'degraded' | 'down';
   message?: string;
