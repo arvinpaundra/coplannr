@@ -3,16 +3,72 @@ import { Link } from '@tanstack/react-router';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { useRegister, useGoogleOAuth } from '@/hooks/useAuth';
 
 export const RegisterPage = () => {
-  const [name, setName] = useState('');
+  const [fullname, setFullname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [showAgreedError, setShowAgreedError] = useState(false);
+
+  const registerMutation = useRegister();
+  const googleOAuthMutation = useGoogleOAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ name, email, password, agreed });
+    setErrorMessage('');
+    setFieldErrors({});
+    setShowAgreedError(false);
+
+    if (!agreed) {
+      setErrorMessage(
+        'You must agree to the Terms of Service and Privacy Policy'
+      );
+      setShowAgreedError(true);
+      return;
+    }
+
+    registerMutation.mutate(
+      { email, fullname, password },
+      {
+        onSuccess: (response) => {
+          if (response.meta.code === 400 && response.errors) {
+            setFieldErrors(response.errors);
+            setErrorMessage('Please fix the errors below');
+          } else if (response.meta.code !== 200 && response.meta.code !== 201) {
+            setErrorMessage(
+              response.meta.message || 'Registration failed. Please try again.'
+            );
+          }
+        },
+        onError: (error: unknown) => {
+          const response =
+            (error as { response?: { data?: unknown } })?.response?.data ||
+            error;
+
+          // Handle validation errors (400)
+          if (response && typeof response === 'object' && 'meta' in response) {
+            const apiResponse = response as {
+              meta?: { code?: number; message?: string };
+              errors?: Record<string, string[]>;
+            };
+            if (apiResponse.meta?.code === 400 && apiResponse.errors) {
+              setFieldErrors(apiResponse.errors);
+              setErrorMessage('Please fix the errors below');
+            } else if (apiResponse.meta?.message) {
+              setErrorMessage(apiResponse.meta.message);
+            } else {
+              setErrorMessage('Registration failed. Please try again.');
+            }
+          } else {
+            setErrorMessage('Registration failed. Please try again.');
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -55,17 +111,35 @@ export const RegisterPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMessage && (
+              <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
+                <div className="flex items-center gap-2">
+                  <Icon
+                    icon="solar:danger-triangle-bold"
+                    className="text-base"
+                  />
+                  <span className="font-bold">{errorMessage}</span>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-1">
               <label className="block font-bold text-xs uppercase tracking-wide">
                 Full Name
               </label>
               <Input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
                 placeholder="e.g. John System"
                 icon={<Icon icon="solar:user-circle-linear" />}
+                required
               />
+              {fieldErrors.fullname && (
+                <p className="text-xs text-red-600 mt-1">
+                  {fieldErrors.fullname.join(', ')}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -78,7 +152,13 @@ export const RegisterPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@coplannr.xyz"
                 icon={<Icon icon="solar:letter-linear" />}
+                required
               />
+              {fieldErrors.email && (
+                <p className="text-xs text-red-600 mt-1">
+                  {fieldErrors.email.join(', ')}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -91,7 +171,14 @@ export const RegisterPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 icon={<Icon icon="solar:lock-password-linear" />}
+                required
+                minLength={8}
               />
+              {fieldErrors.password && (
+                <p className="text-xs text-red-600 mt-1">
+                  {fieldErrors.password.join(', ')}
+                </p>
+              )}
             </div>
 
             <div className="pt-2 pb-2">
@@ -100,8 +187,13 @@ export const RegisterPage = () => {
                   <input
                     type="checkbox"
                     checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
-                    className="peer appearance-none w-5 h-5 border-2 border-black bg-white checked:bg-brand-neon transition-colors cursor-pointer"
+                    onChange={(e) => {
+                      setAgreed(e.target.checked);
+                      setShowAgreedError(false);
+                    }}
+                    className={`peer appearance-none w-5 h-5 border-2 ${
+                      showAgreedError ? 'border-red-500' : 'border-black'
+                    } bg-white checked:bg-brand-neon transition-colors cursor-pointer`}
                   />
                   <svg
                     className="absolute inset-0 m-auto w-3 h-3 opacity-0 peer-checked:opacity-100 pointer-events-none"
@@ -117,7 +209,11 @@ export const RegisterPage = () => {
                     />
                   </svg>
                 </div>
-                <span className="text-xs text-neutral-600 leading-tight">
+                <span
+                  className={`text-xs leading-tight ${
+                    showAgreedError ? 'text-red-600' : 'text-neutral-600'
+                  }`}
+                >
                   I agree to the{' '}
                   <a
                     href="#"
@@ -135,14 +231,30 @@ export const RegisterPage = () => {
                   .
                 </span>
               </label>
+              {showAgreedError && (
+                <p className="text-xs text-red-600 mt-2 flex items-center gap-1">
+                  <Icon icon="solar:danger-triangle-bold" className="text-sm" />
+                  <span>You must agree to continue</span>
+                </p>
+              )}
             </div>
 
             <Button
               type="submit"
               className="w-full py-3 flex items-center justify-center gap-2"
+              disabled={registerMutation.isPending}
             >
-              Create Account
-              <Icon icon="solar:arrow-right-linear" className="text-lg" />
+              {registerMutation.isPending ? (
+                <>
+                  <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  Create Account
+                  <Icon icon="solar:arrow-right-linear" className="text-lg" />
+                </>
+              )}
             </Button>
           </form>
 
@@ -162,9 +274,23 @@ export const RegisterPage = () => {
           <Button
             variant="secondary"
             className="w-full py-3 flex items-center justify-center gap-3"
+            onClick={(e) => {
+              e.preventDefault();
+              googleOAuthMutation.mutate(undefined);
+            }}
+            disabled={googleOAuthMutation.isPending}
           >
-            <Icon icon="logos:google-icon" className="text-lg" />
-            <span>Google</span>
+            {googleOAuthMutation.isPending ? (
+              <>
+                <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                <span>Redirecting...</span>
+              </>
+            ) : (
+              <>
+                <Icon icon="logos:google-icon" className="text-lg" />
+                <span>Google</span>
+              </>
+            )}
           </Button>
 
           {/* Footer */}

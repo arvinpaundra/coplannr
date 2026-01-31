@@ -1,6 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { useAuthContext } from '@/contexts/auth-utils';
+import { useLogout } from '@/hooks/useAuth';
 
 interface NavItem {
   label: string;
@@ -25,6 +27,13 @@ const systemItems: NavItem[] = [
 ];
 
 export const Sidebar = () => {
+  const { user } = useAuthContext();
+  const logoutMutation = useLogout();
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
     <aside className="hidden lg:flex w-64 flex-col bg-[#fafafa] border-hard-r z-20">
       {/* Brand */}
@@ -44,11 +53,25 @@ export const Sidebar = () => {
       {/* User Profile */}
       <div className="p-4 border-hard-t bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-black text-white flex items-center justify-center font-mono font-bold text-xs border-2 border-transparent">
-            JS
-          </div>
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt={user.fullname}
+              className="w-8 h-8 border-2 border-black object-cover"
+            />
+          ) : (
+            <div className="w-8 h-8 bg-black text-white flex items-center justify-center font-mono font-bold text-xs border-2 border-black">
+              {user?.fullname
+                ?.split(' ')
+                .slice(0, 2)
+                .map((name) => name.charAt(0).toUpperCase())
+                .join('') || 'U'}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold truncate">John System</p>
+            <p className="text-sm font-bold truncate">
+              {user?.fullname || 'User'}
+            </p>
             <p className="text-xs text-neutral-500 font-mono truncate">
               Pro Plan
             </p>
@@ -56,6 +79,7 @@ export const Sidebar = () => {
           <Icon
             icon="solar:logout-2-linear"
             className="text-lg hover:text-brand-red cursor-pointer"
+            onClick={handleLogout}
           />
         </div>
       </div>

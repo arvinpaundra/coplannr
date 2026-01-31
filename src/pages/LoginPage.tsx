@@ -1,18 +1,62 @@
-import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { useLogin, useGoogleOAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/auth-utils';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const loginMutation = useLogin();
+  const googleOAuthMutation = useGoogleOAuth();
+  const { isAuthenticated } = useAuthContext();
+  const navigate = useNavigate();
+
+  // Redirect to dashboard when authenticated
+  useEffect(() => {
+    if (isAuthenticated && loginMutation.isSuccess) {
+      navigate({ to: '/dashboard' });
+    }
+  }, [isAuthenticated, loginMutation.isSuccess, navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ email, password, remember });
+    setErrorMessage('');
+
+    loginMutation.mutate(
+      { email, password },
+      {
+        onSuccess: (response) => {
+          if (response.meta.code !== 200) {
+            setErrorMessage(
+              response.meta.message || 'Login failed. Please try again.'
+            );
+          }
+          // Navigation will happen via useEffect when isAuthenticated becomes true
+        },
+        onError: (error: unknown) => {
+          const response =
+            (error as { response?: { data?: unknown } })?.response?.data ||
+            error;
+          if (response && typeof response === 'object' && 'meta' in response) {
+            const meta = (response as { meta?: { message?: string } }).meta;
+            if (meta?.message) {
+              setErrorMessage(meta.message);
+            } else {
+              setErrorMessage('Login failed. Please try again.');
+            }
+          } else {
+            setErrorMessage('Login failed. Please try again.');
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -37,7 +81,7 @@ export const LoginPage = () => {
       </div>
 
       {/* Login Card */}
-      <div className="w-full max-w-md p-4 z-10">
+      <main className="w-full max-w-md p-4 z-10">
         <div className="bg-white border-hard shadow-hard p-6 md:p-8 relative">
           {/* Corner Accents */}
           <div className="absolute -top-2 -left-2 w-4 h-4 bg-brand-neon border-2 border-black" />
@@ -55,6 +99,18 @@ export const LoginPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {errorMessage && (
+              <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
+                <div className="flex items-center gap-2">
+                  <Icon
+                    icon="solar:danger-triangle-bold"
+                    className="text-base"
+                  />
+                  <span className="font-bold">{errorMessage}</span>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-1">
               <label className="block font-bold text-xs uppercase tracking-wide">
                 Email
@@ -65,6 +121,7 @@ export const LoginPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@coplannr.xyz"
                 icon={<Icon icon="solar:letter-linear" />}
+                required
               />
             </div>
 
@@ -86,6 +143,7 @@ export const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 icon={<Icon icon="solar:lock-password-linear" />}
+                required
               />
             </div>
 
@@ -100,9 +158,19 @@ export const LoginPage = () => {
             <Button
               type="submit"
               className="w-full py-3 flex items-center justify-center gap-2"
+              disabled={loginMutation.isPending}
             >
-              Sign In
-              <Icon icon="solar:arrow-right-linear" className="text-lg" />
+              {loginMutation.isPending ? (
+                <>
+                  <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <Icon icon="solar:arrow-right-linear" className="text-lg" />
+                </>
+              )}
             </Button>
           </form>
 
@@ -122,9 +190,23 @@ export const LoginPage = () => {
           <Button
             variant="secondary"
             className="w-full py-3 flex items-center justify-center gap-3"
+            onClick={(e) => {
+              e.preventDefault();
+              googleOAuthMutation.mutate(undefined);
+            }}
+            disabled={googleOAuthMutation.isPending}
           >
-            <Icon icon="logos:google-icon" className="text-lg" />
-            <span>Google</span>
+            {googleOAuthMutation.isPending ? (
+              <>
+                <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                <span>Redirecting...</span>
+              </>
+            ) : (
+              <>
+                <Icon icon="logos:google-icon" className="text-lg" />
+                <span>Google</span>
+              </>
+            )}
           </Button>
 
           {/* Footer */}
@@ -145,7 +227,7 @@ export const LoginPage = () => {
         <div className="text-center mt-6 font-mono text-[10px] text-neutral-400">
           SECURE ACCESS // V1.0.4
         </div>
-      </div>
+      </main>
     </div>
   );
 };
