@@ -34,6 +34,10 @@ export interface LogoutRequest {
   access_token: string;
 }
 
+export interface RefreshTokenRequest {
+  refresh_token: string;
+}
+
 // Auth Response Types
 export interface AuthResponse {
   access_token: string;
@@ -50,6 +54,7 @@ export interface BackendAuthResponse {
 
 export type LoginResponse = BackendAuthResponse;
 export type RegisterResponse = AuthResponse;
+export type RefreshTokenResponse = BackendAuthResponse;
 
 export interface GoogleOAuthInitResponse {
   auth_url: string;

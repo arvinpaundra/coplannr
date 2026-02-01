@@ -1,11 +1,14 @@
 import { apiClient, handleApiError } from './axios';
+import type { AxiosRequestConfig } from 'axios';
 import type {
   ApiResponse,
   RegisterRequest,
   LoginRequest,
   LogoutRequest,
+  RefreshTokenRequest,
   RegisterResponse,
   LoginResponse,
+  RefreshTokenResponse,
   User,
   GoogleOAuthInitResponse,
   GoogleOAuthCallbackResponse,
@@ -75,6 +78,30 @@ export const getCurrentUser = async (): Promise<ApiResponse<User>> => {
     return response.data;
   } catch (error) {
     return handleApiError(error) as ApiResponse<User>;
+  }
+};
+
+/**
+ * Refresh access token using refresh token
+ * POST /v1/auth/refresh-token
+ * Note: This endpoint should not require Authorization header (uses refresh_token in body)
+ */
+export const refreshAccessToken = async (
+  refreshToken: string
+): Promise<ApiResponse<RefreshTokenResponse>> => {
+  try {
+    const payload: RefreshTokenRequest = { refresh_token: refreshToken };
+    // Skip Authorization header for refresh endpoint (uses refresh_token in body)
+    const response = await apiClient.post<ApiResponse<RefreshTokenResponse>>(
+      '/v1/auth/refresh-token',
+      payload,
+      {
+        skipAuth: true,
+      } as AxiosRequestConfig & { skipAuth?: boolean }
+    );
+    return response.data;
+  } catch (error) {
+    return handleApiError(error) as ApiResponse<RefreshTokenResponse>;
   }
 };
 

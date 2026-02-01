@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { ApiResponse } from '@/types/api';
 import { config } from '@/lib/config';
+import { refreshAccessToken } from './auth';
 
 // Create axios instance with default config
 export const apiClient = axios.create({
@@ -30,7 +31,12 @@ const processQueue = (error: Error | null = null) => {
 
 // Request interceptor - Add Authorization header
 apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig & { skipAuth?: boolean }) => {
+    // Skip Authorization header for refresh token endpoint
+    if (config.skipAuth) {
+      return config;
+    }
+
     // Get token from localStorage
     const token = localStorage.getItem('access_token');
 
@@ -76,22 +82,58 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // TODO: Implement refresh token endpoint when available
-        // Example: await apiClient.post('/v1/api/refresh', {}, { withCredentials: true });
+        // Get refresh token from localStorage
+        const refreshToken = localStorage.getItem('refresh_token');
 
-        // For now, we'll just process the queue and reject
-        // This architecture is ready for when refresh endpoint is available
+        if (!refreshToken) {
+          // No refresh token available, clear tokens and reject
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          processQueue(new Error('No refresh token available'));
+          return Promise.reject(error);
+        }
 
-        // Uncomment when refresh endpoint is ready:
-        // const response = await apiClient.post('/v1/api/refresh');
-        // if (response.status === 200) {
-        //   processQueue(null);
-        //   return apiClient(originalRequest);
-        // }
+        // Call refresh token endpoint
+        const response = await refreshAccessToken(refreshToken);
 
-        processQueue(new Error('Session expired'));
-        return Promise.reject(error);
+        if (response.meta.code === 200 && response.data) {
+          // Update tokens in localStorage
+          localStorage.setItem('access_token', response.data.access_token);
+          if (response.data.refresh_token) {
+            localStorage.setItem('refresh_token', response.data.refresh_token);
+          }
+
+          // Update AuthContext if available
+          const authContext = (
+            window as Window & {
+              __AUTH_CONTEXT__?: {
+                setAccessToken?: (token: string | null) => void;
+              };
+            }
+          ).__AUTH_CONTEXT__;
+          if (authContext?.setAccessToken) {
+            authContext.setAccessToken(response.data.access_token);
+          }
+
+          // Update the original request's Authorization header
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
+          }
+
+          // Process queued requests and retry original request
+          processQueue(null);
+          return apiClient(originalRequest);
+        } else {
+          // Refresh failed, clear tokens
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          processQueue(new Error('Token refresh failed'));
+          return Promise.reject(error);
+        }
       } catch (refreshError) {
+        // Refresh failed, clear tokens
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         processQueue(refreshError as Error);
         return Promise.reject(refreshError);
       } finally {
