@@ -176,6 +176,59 @@ export const LandingPage = () => {
         </div>
       </section>
 
+      {/* Platforms Section */}
+      <section className="border-hard-b bg-[#f8f8f8] p-12 md:p-16">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <div className="w-2 h-2 bg-brand-red rounded-full" />
+            <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-neutral-600">
+              Supported Platforms
+            </h3>
+            <div className="w-2 h-2 bg-brand-red rounded-full" />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+            {/* Facebook */}
+            <div className="bg-white border-hard px-6 py-4 flex items-center gap-3 shadow-hard-sm hover:shadow-hard transition-all group cursor-default">
+              <div className="w-8 h-8 bg-[#1877F2] border-2 border-black flex items-center justify-center text-white">
+                <Icon icon="ri:facebook-fill" />
+              </div>
+              <span className="font-bold uppercase tracking-tight text-lg">
+                Facebook
+              </span>
+            </div>
+
+            {/* Instagram */}
+            <div className="bg-white border-hard px-6 py-4 flex items-center gap-3 shadow-hard-sm hover:shadow-hard transition-all group cursor-default">
+              <div className="w-8 h-8 bg-linear-to-tr from-yellow-400 to-purple-600 border-2 border-black flex items-center justify-center text-white">
+                <Icon icon="ri:instagram-line" />
+              </div>
+              <span className="font-bold uppercase tracking-tight text-lg">
+                Instagram
+              </span>
+            </div>
+
+            {/* Threads */}
+            <div className="bg-white border-hard px-6 py-4 flex items-center gap-3 shadow-hard-sm hover:shadow-hard transition-all group cursor-default">
+              <div className="w-8 h-8 bg-black border-2 border-black flex items-center justify-center text-white">
+                <Icon icon="ri:threads-fill" />
+              </div>
+              <span className="font-bold uppercase tracking-tight text-lg">
+                Threads
+              </span>
+            </div>
+
+            {/* Coming Soon */}
+            <div className="bg-brand-neon border-2 border-black border-dashed px-6 py-4 flex items-center gap-3 opacity-60">
+              <Icon icon="solar:add-square-linear" className="text-xl" />
+              <span className="font-mono text-xs font-bold uppercase">
+                More Socials Soon
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="border-hard-b">
         <div className="bg-black text-white p-4 border-b-2 border-white flex justify-between items-center">
@@ -277,6 +330,132 @@ export const LandingPage = () => {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section className="bg-white p-8 md:p-20 border-hard-b relative">
+        {/* Abstract Decoration */}
+        <div className="absolute right-0 top-0 p-2 hidden lg:block">
+          <div className="flex gap-1">
+            <div className="w-2 h-2 bg-black" />
+            <div className="w-2 h-2 bg-black opacity-50" />
+            <div className="w-2 h-2 bg-black opacity-20" />
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight uppercase leading-none mb-4">
+                Flat Pricing.
+              </h2>
+              <p className="font-mono text-neutral-500">
+                No hidden fees. Cancel anytime.
+              </p>
+            </div>
+          </div>
+
+          {/* 2 Column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start justify-center">
+            {/* Tier 1 - Starter */}
+            <Card className="p-8 relative hover:shadow-hard transition-shadow duration-300">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-widest mb-4 text-neutral-500">
+                Starter
+              </h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold tracking-tighter">
+                  Rp 0
+                </span>
+                <span className="text-xs font-mono text-neutral-400">/mo</span>
+              </div>
+              <p className="text-sm font-mono leading-relaxed mb-8 border-l-2 border-neutral-200 pl-3 text-neutral-600">
+                Perfect for hobbyists just starting out.
+              </p>
+              <ul className="space-y-3 font-mono text-sm text-neutral-700 mb-8">
+                <li className="flex items-center gap-3">
+                  <Icon icon="solar:check-read-linear" className="text-lg" /> 1
+                  Platform
+                </li>
+                <li className="flex items-center gap-3">
+                  <Icon icon="solar:check-read-linear" className="text-lg" /> 10
+                  Posts / mo
+                </li>
+                <li className="flex items-center gap-3">
+                  <Icon icon="solar:check-read-linear" className="text-lg" />{' '}
+                  Basic Analytics
+                </li>
+              </ul>
+              <Link to="/register">
+                <Button
+                  variant="secondary"
+                  className="w-full py-3 px-4 text-xs"
+                >
+                  Start Free
+                </Button>
+              </Link>
+            </Card>
+
+            {/* Tier 2 - Creator (Highlighted) */}
+            <Card className="p-8 bg-black text-white relative shadow-hard transform md:-translate-y-4">
+              <div className="absolute top-0 right-0 bg-brand-neon text-black text-[10px] font-bold px-2 py-1 uppercase font-mono border-l-2 border-b-2 border-black">
+                Best Value
+              </div>
+              <h3 className="font-mono text-xs font-bold uppercase tracking-widest mb-4 text-brand-neon">
+                Creator
+              </h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold tracking-tighter">
+                  Rp 149.000
+                </span>
+                <span className="text-xs font-mono text-neutral-500">/mo</span>
+              </div>
+              <p className="text-sm font-mono leading-relaxed mb-8 border-l-2 border-brand-neon pl-3 text-neutral-300">
+                For serious creators who need scale.
+              </p>
+              <ul className="space-y-3 font-mono text-sm text-neutral-300 mb-8">
+                <li className="flex items-center gap-3">
+                  <Icon
+                    icon="solar:check-circle-bold"
+                    className="text-lg text-brand-neon"
+                  />{' '}
+                  Facebook, Insta, Threads
+                </li>
+                <li className="flex items-center gap-3">
+                  <Icon
+                    icon="solar:check-circle-bold"
+                    className="text-lg text-brand-neon"
+                  />{' '}
+                  Unlimited Posts
+                </li>
+                <li className="flex items-center gap-3">
+                  <Icon
+                    icon="solar:check-circle-bold"
+                    className="text-lg text-brand-neon"
+                  />{' '}
+                  Advanced Analytics
+                </li>
+                <li className="flex items-center gap-3">
+                  <Icon
+                    icon="solar:check-circle-bold"
+                    className="text-lg text-brand-neon"
+                  />{' '}
+                  Priority Support
+                </li>
+              </ul>
+
+              <Link to="/register">
+                <Button className="w-full bg-brand-neon text-black border-2 border-white py-3 px-4 text-xs hover:bg-white! hover:border-brand-neon mb-2">
+                  Start 7-Day Free Trial
+                </Button>
+              </Link>
+              <div className="text-center">
+                <span className="font-mono text-[10px] text-neutral-400 uppercase">
+                  Then Rp 149.000/mo
+                </span>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Who is this for */}
       <section className="border-hard-b flex flex-col md:flex-row">
         <div className="w-full md:w-1/2 border-hard-b md:border-b-0 md:border-hard-r p-12 bg-white">
@@ -333,7 +512,7 @@ export const LandingPage = () => {
               variant="secondary"
               className="text-lg md:text-xl py-5 px-10 shadow-[8px_8px_0px_0px_#ff3333]! hover:bg-white active:shadow-none!"
             >
-              Get Started
+              Start 7-Day Free Trial
             </Button>
           </Link>
 
