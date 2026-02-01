@@ -70,7 +70,7 @@ export const GoogleOAuthErrorPage = () => {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-2 uppercase glitch-text cursor-default">
+            <h1 className="text-3xl font-bold tracking-tight mb-2 uppercase cursor-default">
               Access Denied
             </h1>
             <p className="text-neutral-500 text-sm leading-relaxed max-w-xs mx-auto">

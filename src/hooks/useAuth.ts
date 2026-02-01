@@ -5,15 +5,18 @@ import {
   registerUser,
   loginUser,
   logoutUser,
+  updateProfile,
   initiateGoogleOAuth,
   handleGoogleOAuthCallback,
 } from '@/lib/api/auth';
 import type {
   RegisterRequest,
   LoginRequest,
+  UpdateProfileRequest,
   ApiResponse,
   RegisterResponse,
   LoginResponse,
+  User,
   GoogleOAuthCallbackResponse,
 } from '@/types/api';
 
@@ -99,6 +102,23 @@ export const useRefetchUser = () => {
 export const useIsAuthenticated = () => {
   const { isAuthenticated } = useAuthContext();
   return isAuthenticated;
+};
+
+/**
+ * Hook for updating user profile
+ */
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UpdateProfileRequest) => updateProfile(data),
+    onSuccess: (response: ApiResponse<User>) => {
+      if (response.meta.code === 200) {
+        // Invalidate currentUser query to refetch updated data
+        queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      }
+    },
+  });
 };
 
 /**

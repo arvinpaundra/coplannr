@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useRegister, useGoogleOAuth } from '@/hooks/useAuth';
+import { getFormErrorsFromApiResponse } from '@/lib/utils/api-errors';
 
 export const RegisterPage = () => {
   const [fullname, setFullname] = useState('');
@@ -11,7 +12,7 @@ export const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showAgreedError, setShowAgreedError] = useState(false);
 
   const registerMutation = useRegister();
@@ -35,37 +36,34 @@ export const RegisterPage = () => {
       { email, fullname, password },
       {
         onSuccess: (response) => {
-          if (response.meta.code === 400 && response.errors) {
-            setFieldErrors(response.errors);
-            setErrorMessage('Please fix the errors below');
-          } else if (response.meta.code !== 200 && response.meta.code !== 201) {
+          if (response.meta.code === 201) {
+            // Success - navigation handled by useRegister hook
+            setFieldErrors({});
+            setErrorMessage('');
+          } else {
+            // Handle validation errors (400) or other errors
+            const { fieldErrors: errors, generalError } =
+              getFormErrorsFromApiResponse(response);
+            setFieldErrors(errors);
             setErrorMessage(
-              response.meta.message || 'Registration failed. Please try again.'
+              generalError ||
+                (Object.keys(errors).length > 0
+                  ? 'Please fix the errors below'
+                  : response.meta.message ||
+                    'Registration failed. Please try again.')
             );
           }
         },
         onError: (error: unknown) => {
-          const response =
-            (error as { response?: { data?: unknown } })?.response?.data ||
-            error;
-
-          // Handle validation errors (400)
-          if (response && typeof response === 'object' && 'meta' in response) {
-            const apiResponse = response as {
-              meta?: { code?: number; message?: string };
-              errors?: Record<string, string[]>;
-            };
-            if (apiResponse.meta?.code === 400 && apiResponse.errors) {
-              setFieldErrors(apiResponse.errors);
-              setErrorMessage('Please fix the errors below');
-            } else if (apiResponse.meta?.message) {
-              setErrorMessage(apiResponse.meta.message);
-            } else {
-              setErrorMessage('Registration failed. Please try again.');
-            }
-          } else {
-            setErrorMessage('Registration failed. Please try again.');
-          }
+          const { fieldErrors: errors, generalError } =
+            getFormErrorsFromApiResponse(error);
+          setFieldErrors(errors);
+          setErrorMessage(
+            generalError ||
+              (Object.keys(errors).length > 0
+                ? 'Please fix the errors below'
+                : 'Registration failed. Please try again.')
+          );
         },
       }
     );
@@ -137,7 +135,7 @@ export const RegisterPage = () => {
               />
               {fieldErrors.fullname && (
                 <p className="text-xs text-red-600 mt-1">
-                  {fieldErrors.fullname.join(', ')}
+                  {fieldErrors.fullname}
                 </p>
               )}
             </div>
@@ -155,9 +153,7 @@ export const RegisterPage = () => {
                 required
               />
               {fieldErrors.email && (
-                <p className="text-xs text-red-600 mt-1">
-                  {fieldErrors.email.join(', ')}
-                </p>
+                <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
               )}
             </div>
 
@@ -176,7 +172,7 @@ export const RegisterPage = () => {
               />
               {fieldErrors.password && (
                 <p className="text-xs text-red-600 mt-1">
-                  {fieldErrors.password.join(', ')}
+                  {fieldErrors.password}
                 </p>
               )}
             </div>

@@ -4,6 +4,8 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { PageFooter } from '@/components/layout/PageFooter';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
+import { Header } from '@/components/layout/Header';
+import { usePlatforms } from '@/hooks/usePlatforms';
 
 export const ComposePage = () => {
   const [isScheduled, setIsScheduled] = useState(true);
@@ -28,12 +30,11 @@ export const ComposePage = () => {
   });
   const [internalTags, setInternalTags] = useState('');
 
-  const platforms = [
-    { id: 'twitter', name: 'Twitter', icon: 'carbon:logo-x' },
-    { id: 'linkedin', name: 'LinkedIn', icon: 'carbon:logo-linkedin' },
-    { id: 'facebook', name: 'Facebook', icon: 'carbon:logo-facebook' },
-    { id: 'instagram', name: 'Insta', icon: 'carbon:logo-instagram' },
-  ];
+  const {
+    data: platforms = [],
+    isLoading: isLoadingPlatforms,
+    error: platformsError,
+  } = usePlatforms();
 
   const togglePlatform = (platformId: string) => {
     setSelectedPlatforms((prev) =>
@@ -68,18 +69,7 @@ export const ComposePage = () => {
         />
 
         {/* Header */}
-        <header className="h-16 border-b-2 border-black bg-white flex justify-between items-center px-4 lg:px-8 z-10 shrink-0">
-          <div className="flex items-center gap-2 font-mono text-xs md:text-sm">
-            <span className="text-neutral-400">HOME</span>
-            <span className="text-neutral-300">/</span>
-            <span className="font-bold">COMPOSE</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="px-4 py-2 text-xs font-bold uppercase tracking-wide border-2 border-black bg-white shadow-hard-sm hover:shadow-hard hover:-translate-x-px hover:-translate-y-px active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
-              Save Draft
-            </button>
-          </div>
-        </header>
+        <Header title="COMPOSE" />
 
         {/* Scrollable Form Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 z-10">
@@ -97,30 +87,59 @@ export const ComposePage = () => {
                     MULTIPLE SELECT
                   </span>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {platforms.map((platform) => (
-                    <label key={platform.id} className="cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="hidden"
-                        checked={selectedPlatforms.includes(platform.id)}
-                        onChange={() => togglePlatform(platform.id)}
+                {platformsError ? (
+                  <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        icon="solar:danger-triangle-bold"
+                        className="text-base"
                       />
+                      <span className="font-bold">
+                        Failed to load platforms. Please try again.
+                      </span>
+                    </div>
+                  </div>
+                ) : isLoadingPlatforms ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[1, 2, 3, 4].map((i) => (
                       <div
-                        className={`flex items-center justify-center gap-2 w-full p-3 border-2 border-black transition-all ${
-                          selectedPlatforms.includes(platform.id)
-                            ? 'bg-brand-neon shadow-hard-sm -translate-px opacity-100 font-bold'
-                            : 'bg-white opacity-60'
-                        }`}
+                        key={i}
+                        className="w-full p-3 border-2 border-black bg-neutral-100 animate-pulse"
                       >
-                        <Icon icon={platform.icon} />
-                        <span className="font-mono text-xs">
-                          {platform.name}
-                        </span>
+                        <div className="h-4 bg-neutral-300 rounded" />
                       </div>
-                    </label>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : platforms.length === 0 ? (
+                  <div className="text-center py-4 text-sm text-neutral-500 font-mono">
+                    No platforms available
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {platforms.map((platform) => (
+                      <label key={platform.id} className="cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="hidden"
+                          checked={selectedPlatforms.includes(platform.id)}
+                          onChange={() => togglePlatform(platform.id)}
+                        />
+                        <div
+                          className={`flex items-center justify-center gap-2 w-full p-3 border-2 border-black transition-all ${
+                            selectedPlatforms.includes(platform.id)
+                              ? 'bg-brand-neon shadow-hard-sm -translate-px opacity-100 font-bold'
+                              : 'bg-white opacity-60'
+                          }`}
+                        >
+                          <Icon icon={platform.icon} />
+                          <span className="font-mono text-xs">
+                            {platform.name}
+                          </span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Section: Editor */}

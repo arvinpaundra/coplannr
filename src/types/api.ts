@@ -5,7 +5,7 @@ export interface ApiResponse<T = unknown> {
     message: string;
   };
   data: T | null;
-  errors?: Record<string, string[]>;
+  errors?: Record<string, string>;
 }
 
 // User Types
@@ -16,6 +16,15 @@ export interface User {
   status: string;
   provider: string;
   avatar_url: string | null;
+  org_name: string | null;
+}
+
+// Platform Types
+export interface Platform {
+  id: string;
+  name: string;
+  code: string;
+  icon: string;
 }
 
 // Auth Request Types
@@ -36,6 +45,12 @@ export interface LogoutRequest {
 
 export interface RefreshTokenRequest {
   refresh_token: string;
+}
+
+export interface UpdateProfileRequest {
+  fullname: string;
+  email: string;
+  org_name?: string | null;
 }
 
 // Auth Response Types
@@ -71,5 +86,5 @@ export interface ValidationError {
 export interface ApiError {
   code: number;
   message: string;
-  errors?: Record<string, string[]>;
+  errors?: Record<string, string>;
 }

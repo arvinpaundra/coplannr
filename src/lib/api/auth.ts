@@ -6,6 +6,7 @@ import type {
   LoginRequest,
   LogoutRequest,
   RefreshTokenRequest,
+  UpdateProfileRequest,
   RegisterResponse,
   LoginResponse,
   RefreshTokenResponse,
@@ -75,6 +76,21 @@ export const logoutUser = async (
 export const getCurrentUser = async (): Promise<ApiResponse<User>> => {
   try {
     const response = await apiClient.get<ApiResponse<User>>('/v1/me');
+    return response.data;
+  } catch (error) {
+    return handleApiError(error) as ApiResponse<User>;
+  }
+};
+
+/**
+ * Update user profile
+ * PUT /v1/me
+ */
+export const updateProfile = async (
+  data: UpdateProfileRequest
+): Promise<ApiResponse<User>> => {
+  try {
+    const response = await apiClient.put<ApiResponse<User>>('/v1/me', data);
     return response.data;
   } catch (error) {
     return handleApiError(error) as ApiResponse<User>;

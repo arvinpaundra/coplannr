@@ -1,3 +1,4 @@
+import { useState, useEffect, startTransition } from 'react';
 import { Icon } from '@iconify/react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
@@ -5,8 +6,86 @@ import { PageFooter } from '@/components/layout/PageFooter';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+import { useAuthContext } from '@/contexts/auth-utils';
+import { useUpdateProfile } from '@/hooks/useAuth';
+import { getFormErrorsFromApiResponse } from '@/lib/utils/api-errors';
 
 export const SettingsPage = () => {
+  const { user } = useAuthContext();
+  const updateProfileMutation = useUpdateProfile();
+
+  const [formData, setFormData] = useState({
+    fullname: user?.fullname || '',
+    email: user?.email || '',
+    orgName: user?.org_name ?? '',
+  });
+  const [errorMessage, setErrorMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Reset form when user changes (standard React pattern)
+  // Using startTransition to avoid React compiler warning
+  useEffect(() => {
+    if (user) {
+      startTransition(() => {
+        setFormData({
+          fullname: user.fullname || '',
+          email: user.email || '',
+          orgName: user.org_name ?? '',
+        });
+      });
+    }
+  }, [user, user?.id]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setFieldErrors({});
+    setSuccessMessage('');
+
+    updateProfileMutation.mutate(
+      {
+        fullname: formData.fullname,
+        email: formData.email,
+        org_name: formData.orgName || null,
+      },
+      {
+        onSuccess: (response) => {
+          if (response.meta.code === 200) {
+            setSuccessMessage('Profile updated successfully');
+            // Clear success message after 3 seconds
+            setTimeout(() => setSuccessMessage(''), 3000);
+            // Clear any previous errors
+            setFieldErrors({});
+            setErrorMessage('');
+          } else {
+            // Handle validation errors (400) or other errors
+            const { fieldErrors: errors, generalError } =
+              getFormErrorsFromApiResponse(response);
+            setFieldErrors(errors);
+            setErrorMessage(
+              generalError ||
+                (Object.keys(errors).length > 0
+                  ? 'Please fix the errors below'
+                  : response.meta.message ||
+                    'Failed to update profile. Please try again.')
+            );
+          }
+        },
+        onError: (error: unknown) => {
+          const { fieldErrors: errors, generalError } =
+            getFormErrorsFromApiResponse(error);
+          setFieldErrors(errors);
+          setErrorMessage(
+            generalError ||
+              (Object.keys(errors).length > 0
+                ? 'Please fix the errors below'
+                : 'Failed to update profile. Please try again.')
+          );
+        },
+      }
+    );
+  };
   return (
     <div className="flex h-screen w-screen">
       <Sidebar />
@@ -39,26 +118,106 @@ export const SettingsPage = () => {
                 <Icon icon="solar:user-circle-linear" />
                 Profile Information
               </h2>
-              <form className="space-y-4">
+              <form
+                key={user?.id}
+                onSubmit={handleSubmit}
+                className="space-y-4"
+              >
+                {errorMessage && (
+                  <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        icon="solar:danger-triangle-bold"
+                        className="text-base"
+                      />
+                      <span className="font-bold">{errorMessage}</span>
+                    </div>
+                  </div>
+                )}
+
+                {successMessage && (
+                  <div className="bg-green-50 border-2 border-green-500 p-3 text-xs text-green-700">
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        icon="solar:check-circle-bold"
+                        className="text-base"
+                      />
+                      <span className="font-bold">{successMessage}</span>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="block font-bold text-xs uppercase tracking-wide mb-2">
                     Full Name
                   </label>
-                  <Input defaultValue="John System" />
+                  <Input
+                    value={formData.fullname}
+                    placeholder="e.g. John System"
+                    onChange={(e) =>
+                      setFormData({ ...formData, fullname: e.target.value })
+                    }
+                    required
+                  />
+                  {fieldErrors.fullname && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {fieldErrors.fullname}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block font-bold text-xs uppercase tracking-wide mb-2">
                     Email Address
                   </label>
-                  <Input type="email" defaultValue="john@coplannr.xyz" />
+                  <Input
+                    type="email"
+                    placeholder="e.g. john@coplannr.xyz"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                  />
+                  {fieldErrors.email && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block font-bold text-xs uppercase tracking-wide mb-2">
                     Company / Organization
                   </label>
-                  <Input defaultValue="Coplannr Inc." />
+                  <Input
+                    value={formData.orgName}
+                    placeholder="e.g. Coplannr Inc."
+                    onChange={(e) =>
+                      setFormData({ ...formData, orgName: e.target.value })
+                    }
+                  />
+                  {fieldErrors.org_name && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {fieldErrors.org_name}
+                    </p>
+                  )}
                 </div>
-                <Button className="px-6 py-2">Save Changes</Button>
+                <Button
+                  type="submit"
+                  className="px-6 py-2"
+                  disabled={updateProfileMutation.isPending}
+                >
+                  {updateProfileMutation.isPending ? (
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        icon="svg-spinners:ring-resize"
+                        className="text-lg"
+                      />
+                      Saving...
+                    </div>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
               </form>
             </Card>
 
@@ -96,7 +255,7 @@ export const SettingsPage = () => {
             </Card>
 
             {/* Timezone */}
-            <Card className="p-6">
+            {/* <Card className="p-6">
               <h2 className="font-bold uppercase text-lg mb-4 flex items-center gap-2">
                 <Icon icon="solar:clock-circle-linear" />
                 Timezone & Region
@@ -116,10 +275,10 @@ export const SettingsPage = () => {
 
                 <Button className="px-6 py-2">Confirm</Button>
               </div>
-            </Card>
+            </Card> */}
 
             {/* Danger Zone */}
-            <Card className="p-6 bg-[#fff5f5] border-brand-red">
+            {/* <Card className="p-6 bg-[#fff5f5] border-brand-red">
               <h2 className="font-bold uppercase text-lg mb-4 flex items-center gap-2 text-brand-red">
                 <Icon icon="solar:danger-triangle-linear" />
                 Danger Zone
@@ -140,7 +299,7 @@ export const SettingsPage = () => {
                   </Button>
                 </div>
               </div>
-            </Card>
+            </Card> */}
           </div>
 
           <PageFooter />
