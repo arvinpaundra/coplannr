@@ -4,8 +4,11 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Link } from '@tanstack/react-router';
+import { useAuthContext } from '@/contexts/auth-utils';
 
 export const LandingPage = () => {
+  const { isAuthenticated } = useAuthContext();
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -383,7 +386,7 @@ export const LandingPage = () => {
                   Basic Analytics
                 </li>
               </ul>
-              <Link to="/register">
+              <Link to={isAuthenticated ? '/dashboard' : '/register'}>
                 <Button
                   variant="secondary"
                   className="w-full py-3 px-4 text-xs"
@@ -416,7 +419,7 @@ export const LandingPage = () => {
                     icon="solar:check-circle-bold"
                     className="text-lg text-brand-neon"
                   />{' '}
-                  Facebook, Insta, Threads
+                  Facebook, Instagram, Threads
                 </li>
                 <li className="flex items-center gap-3">
                   <Icon
@@ -441,7 +444,7 @@ export const LandingPage = () => {
                 </li>
               </ul>
 
-              <Link to="/register">
+              <Link to={isAuthenticated ? '/dashboard' : '/register'}>
                 <Button className="w-full bg-brand-neon text-black border-2 border-white py-3 px-4 text-xs hover:bg-white! hover:border-brand-neon mb-2">
                   Start 7-Day Free Trial
                 </Button>
@@ -507,7 +510,7 @@ export const LandingPage = () => {
             <span className="text-brand-red">Start scheduling.</span>
           </h2>
 
-          <Link to="/register">
+          <Link to={isAuthenticated ? '/dashboard' : '/register'}>
             <Button
               variant="secondary"
               className="text-lg md:text-xl py-5 px-10 shadow-[8px_8px_0px_0px_#ff3333]! hover:bg-white active:shadow-none!"

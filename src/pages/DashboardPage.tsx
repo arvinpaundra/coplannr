@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { PageFooter } from '@/components/layout/PageFooter';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Link } from '@tanstack/react-router';
 
 export const DashboardPage = () => {
   return (
@@ -37,13 +38,15 @@ export const DashboardPage = () => {
                   Manage your content pipeline across all frequencies.
                 </p>
               </div>
-              <Button
-                variant="action"
-                className="px-6 py-3 flex items-center gap-2 bg-black text-white hover:text-black"
-              >
-                <Icon icon="solar:add-square-linear" className="text-lg" />
-                Create New Post
-              </Button>
+              <Link to="/compose">
+                <Button
+                  variant="action"
+                  className="px-6 py-3 flex items-center gap-2 bg-black text-white hover:text-black"
+                >
+                  <Icon icon="solar:add-square-linear" className="text-lg" />
+                  Create New Post
+                </Button>
+              </Link>
             </div>
 
             {/* Stats Grid */}
