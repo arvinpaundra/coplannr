@@ -1,6 +1,7 @@
 import { Icon } from '@iconify/react';
 import { SystemStatus } from '../ui/SystemStatus';
 import { NotificationBell } from '../ui/NotificationBell';
+import { useSidebar } from '@/hooks/useSidebar';
 
 interface HeaderProps {
   title: string;
@@ -8,9 +9,15 @@ interface HeaderProps {
 }
 
 export const Header = ({ title, badge }: HeaderProps) => {
+  const { toggle } = useSidebar();
+
   return (
     <header className="h-16 border-hard-b bg-white flex justify-between items-center px-4 lg:px-8 z-10 shrink-0">
-      <button className="lg:hidden mr-4">
+      <button
+        className="lg:hidden mr-4 p-2 hover:bg-neutral-100 transition-colors"
+        onClick={toggle}
+        aria-label="Toggle sidebar"
+      >
         <Icon icon="solar:hamburger-menu-linear" className="text-2xl" />
       </button>
 

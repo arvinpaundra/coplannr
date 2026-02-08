@@ -1,0 +1,50 @@
+<svg
+  width="32"
+  height="32"
+  viewBox="0 0 32 32"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Shadow -->
+  <rect
+    x="4"
+    y="4"
+    width="28"
+    height="28"
+    fill="#000000"
+  />
+
+  <!-- Main red box -->
+  <rect
+    x="2"
+    y="2"
+    width="28"
+    height="28"
+    fill="#ff3333"
+    stroke="#000000"
+    stroke-width="2"
+  />
+
+  <!-- Letter C -->
+  <text
+    x="16"
+    y="21"
+    text-anchor="middle"
+    fill="#ffffff"
+    font-size="18"
+    font-weight="bold"
+    font-family="system-ui, -apple-system, sans-serif"
+  >
+    C
+  </text>
+
+  <!-- Top-right accent square -->
+  <rect
+    x="22"
+    y="0"
+    width="8"
+    height="8"
+    fill="#ccff00"
+    stroke="#000000"
+    stroke-width="1"
+  />
+</svg>

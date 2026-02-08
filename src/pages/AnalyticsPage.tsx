@@ -1,7 +1,9 @@
 import { Icon } from '@iconify/react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
-import { PageFooter } from '@/components/layout/PageFooter';
+import { Sidebar } from '@/components/organisms/Sidebar';
+import { Header } from '@/components/organisms/Header';
+import { PageFooter } from '@/components/organisms/PageFooter';
+import { BackgroundGrid } from '@/components/atoms/BackgroundGrid';
+import { StatsGrid } from '@/components/organisms/StatsGrid';
 
 export const AnalyticsPage = () => {
   return (
@@ -9,93 +11,45 @@ export const AnalyticsPage = () => {
       <Sidebar />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#f8f8f8] relative">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none opacity-20"
-          style={{
-            backgroundImage: 'radial-gradient(#aaa 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        />
+        <BackgroundGrid opacity={0.2} size={20} />
 
         <Header title="ANALYTICS" />
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8 z-10">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Total Posts */}
-              <div className="bg-white border-2 border-black p-4 shadow-[2px_2px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-0.5 transition-all relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Icon
-                    icon="solar:document-text-linear"
-                    className="text-6xl"
-                  />
-                </div>
-                <div className="font-mono text-[10px] uppercase text-neutral-500 mb-1">
-                  Total Posts
-                </div>
-                <div className="text-3xl font-bold tracking-tight">1,204</div>
-                <div className="mt-2 flex items-center gap-2 text-xs font-mono">
-                  <span className="bg-brand-neon px-1 border border-black text-black">
-                    +12%
-                  </span>
-                  <span className="text-neutral-400">vs last period</span>
-                </div>
-              </div>
-
-              {/* Impressions */}
-              <div className="bg-white border-2 border-black p-4 shadow-[2px_2px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-0.5 transition-all relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Icon icon="solar:eye-linear" className="text-6xl" />
-                </div>
-                <div className="font-mono text-[10px] uppercase text-neutral-500 mb-1">
-                  Impressions
-                </div>
-                <div className="text-3xl font-bold tracking-tight">84.2K</div>
-                <div className="mt-2 flex items-center gap-2 text-xs font-mono">
-                  <span className="bg-brand-neon px-1 border border-black text-black">
-                    +5%
-                  </span>
-                  <span className="text-neutral-400">vs last period</span>
-                </div>
-              </div>
-
-              {/* Engagement */}
-              <div className="bg-white border-2 border-black p-4 shadow-[2px_2px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-0.5 transition-all relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Icon icon="solar:graph-up-linear" className="text-6xl" />
-                </div>
-                <div className="font-mono text-[10px] uppercase text-neutral-500 mb-1">
-                  Engagement
-                </div>
-                <div className="text-3xl font-bold tracking-tight">4.8%</div>
-                <div className="mt-2 flex items-center gap-2 text-xs font-mono">
-                  <span className="bg-brand-red px-1 border border-black text-white">
-                    -1.2%
-                  </span>
-                  <span className="text-neutral-400">vs last period</span>
-                </div>
-              </div>
-
-              {/* Streak */}
-              <div className="bg-black border-2 border-black p-4 shadow-[2px_2px_0px_0px_#000] text-white relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Icon
-                    icon="solar:fire-linear"
-                    className="text-brand-red text-6xl"
-                  />
-                </div>
-                <div className="font-mono text-[10px] uppercase text-neutral-400 mb-1">
-                  Streak
-                </div>
-                <div className="text-3xl font-bold tracking-tight text-brand-neon">
-                  14 Days
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-xs font-mono">
-                  <span className="text-neutral-400">Keep it up!</span>
-                </div>
-              </div>
-            </div>
+            <StatsGrid
+              stats={[
+                {
+                  label: 'Total Posts',
+                  value: '1,204',
+                  icon: 'solar:document-text-linear',
+                  change: { value: '+12%', isPositive: true },
+                  description: 'vs last period',
+                },
+                {
+                  label: 'Impressions',
+                  value: '84.2K',
+                  icon: 'solar:eye-linear',
+                  change: { value: '+5%', isPositive: true },
+                  description: 'vs last period',
+                },
+                {
+                  label: 'Engagement',
+                  value: '4.8%',
+                  icon: 'solar:graph-up-linear',
+                  change: { value: '-1.2%', isPositive: false },
+                  description: 'vs last period',
+                },
+                {
+                  label: 'Streak',
+                  value: '14 Days',
+                  icon: 'solar:fire-linear',
+                  variant: 'highlight',
+                  description: 'Keep it up!',
+                },
+              ]}
+            />
 
             {/* Bottom Section: Split Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

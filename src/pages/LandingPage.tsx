@@ -1,20 +1,53 @@
 import { Icon } from '@iconify/react';
-import { Navigation } from '@/components/layout/Navigation';
-import { Footer } from '@/components/layout/Footer';
+import { Navigation } from '@/components/organisms/Navigation';
+import { Footer } from '@/components/organisms/Footer';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { FeatureCard } from '@/components/molecules/FeatureCard';
+import { LandingPricingCard } from '@/components/molecules/LandingPricingCard';
 import { Link } from '@tanstack/react-router';
 import { useAuthContext } from '@/contexts/auth-utils';
+import { useScrollToSection } from '@/hooks/useScrollToSection';
+import { usePlans } from '@/hooks/usePlans';
+import { mapPlansToPricingPlans } from '@/lib/utils/plan-mapper';
 
 export const LandingPage = () => {
   const { isAuthenticated } = useAuthContext();
+  const scrollToSection = useScrollToSection();
+  const {
+    data: plans,
+    isLoading: isLoadingPlans,
+    error: plansError,
+  } = usePlans();
+
+  // Map plans to PricingPlan format
+  const pricingPlans = plans ? mapPlansToPricingPlans(plans) : [];
+
+  // Determine navigation route based on authentication status
+  const getNavigationRoute = () => {
+    return isAuthenticated ? '/subscription' : '/register';
+  };
+
+  // Format currency function
+  const formatCurrency = (amount: number, currency: string = 'IDR') => {
+    if (currency === 'IDR') {
+      return `Rp ${(amount / 1000).toFixed(0)}k`;
+    }
+    if (currency === 'USD') {
+      return `$${amount}`;
+    }
+    return `${currency} ${amount}`;
+  };
 
   return (
     <div className="min-h-screen">
       <Navigation />
 
       {/* Hero Section */}
-      <header className="relative bg-white border-hard-b flex flex-col lg:flex-row min-h-[90vh]">
+      <header
+        id="hero"
+        className="relative bg-white border-hard-b flex flex-col lg:flex-row min-h-[90vh]"
+      >
         <div className="w-full lg:w-2/3 p-6 md:p-12 lg:p-20 flex flex-col justify-center border-hard-b lg:border-b-0 lg:border-hard-r">
           <div className="inline-block bg-brand-neon border-2 border-black px-2 py-1 mb-6 w-max shadow-hard">
             <span className="font-mono text-xs font-bold uppercase tracking-widest text-black">
@@ -39,7 +72,11 @@ export const LandingPage = () => {
                 Start scheduling posts
               </Button>
             </Link>
-            <Button variant="secondary" className="px-8 py-4 text-base">
+            <Button
+              variant="secondary"
+              className="px-8 py-4 text-base"
+              onClick={() => scrollToSection('how-it-works')}
+            >
               View how it works
             </Button>
           </div>
@@ -79,7 +116,10 @@ export const LandingPage = () => {
       </header>
 
       {/* Problem Section */}
-      <section className="bg-brand-red text-white border-hard-b p-8 md:p-16 lg:p-24 selection:bg-black selection:text-white">
+      <section
+        id="problem"
+        className="bg-brand-red text-white border-hard-b p-8 md:p-16 lg:p-24 selection:bg-black selection:text-white"
+      >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-12">
             POSTING EVERYWHERE IS STILL MANUAL.
@@ -127,7 +167,10 @@ export const LandingPage = () => {
       </section>
 
       {/* Solution Section */}
-      <section className="bg-white border-hard-b flex flex-col md:flex-row">
+      <section
+        id="solution"
+        className="bg-white border-hard-b flex flex-col md:flex-row"
+      >
         <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center border-hard-b md:border-b-0 md:border-hard-r">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
             ONE CONTROL PANEL FOR ALL YOUR POSTS.
@@ -180,7 +223,10 @@ export const LandingPage = () => {
       </section>
 
       {/* Platforms Section */}
-      <section className="border-hard-b bg-[#f8f8f8] p-12 md:p-16">
+      <section
+        id="platforms"
+        className="border-hard-b bg-[#f8f8f8] p-12 md:p-16"
+      >
         <div className="max-w-6xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-8">
             <div className="w-2 h-2 bg-brand-red rounded-full" />
@@ -233,7 +279,7 @@ export const LandingPage = () => {
       </section>
 
       {/* How It Works */}
-      <section className="border-hard-b">
+      <section id="how-it-works" className="border-hard-b">
         <div className="bg-black text-white p-4 border-b-2 border-white flex justify-between items-center">
           <h2 className="text-xl font-mono uppercase tracking-widest">
             How it works
@@ -284,183 +330,184 @@ export const LandingPage = () => {
       </section>
 
       {/* Features */}
-      <section className="bg-[#f0f0f0] p-8 md:p-20 border-hard-b">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-12 uppercase">
-            Built for reliability,
-            <br />
-            not hype.
-          </h2>
+      <section
+        id="features"
+        className="bg-[#f0f0f0] p-8 md:p-20 border-hard-b relative overflow-hidden"
+      >
+        {/* Decorative background elements */}
+        <div className="absolute top-20 left-0 w-32 h-32 bg-brand-neon opacity-5 rotate-45 -translate-x-16"></div>
+        <div className="absolute bottom-20 right-0 w-40 h-40 bg-brand-red opacity-5 -rotate-45 translate-x-20"></div>
+        <div
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: 'radial-gradient(#000 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+        />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: 'Multi-platform posting',
-                desc: 'Publish to multiple social platforms from a single source of truth.',
-              },
-              {
-                title: 'Scheduled publishing',
-                desc: 'Posts go out when you want, not when you remember to click send.',
-              },
-              {
-                title: 'Per-platform control',
-                desc: 'Different character limits? Different rules? Fully supported.',
-              },
-              {
-                title: 'Retry & failure handling',
-                desc: 'If an API fails, the post is queued, retried, and logged for review.',
-              },
-              {
-                title: 'Posting history',
-                desc: 'Every action is recorded. Full audit trail of your content distribution.',
-              },
-            ].map((feature) => (
-              <Card key={feature.title} className="p-6">
-                <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
-                <p className="font-mono text-sm text-neutral-600">
-                  {feature.desc}
-                </p>
-              </Card>
-            ))}
-            <Card className="p-6 bg-brand-neon flex items-center justify-center">
-              <span className="font-mono text-black font-bold uppercase tracking-widest text-center">
-                More Infra
-                <br />
-                Coming Soon
-              </span>
-            </Card>
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Enhanced Header */}
+          <div className="mb-16 text-center">
+            <div className="inline-block mb-4">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="w-3 h-3 bg-brand-red border-2 border-black"></div>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tight uppercase">
+                  Features
+                </h2>
+                <div className="w-3 h-3 bg-brand-red border-2 border-black"></div>
+              </div>
+              <div className="h-1 bg-black w-32 mx-auto"></div>
+            </div>
+            <p className="font-mono text-sm md:text-base text-neutral-600 uppercase tracking-widest mt-4">
+              Built for reliability, not hype
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="group">
+              <FeatureCard
+                icon="solar:users-group-two-rounded-bold"
+                title="Multi-Account"
+                description="Manage unlimited handles across different platforms without switching tabs."
+                className="h-full hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 transition-all duration-300"
+              />
+            </div>
+            <div className="group">
+              <FeatureCard
+                icon="solar:calendar-grid-bold"
+                title="Unified Calendar"
+                description="Drag-and-drop your posts across a visual grid to reorganize your strategy instantly."
+                className="h-full hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 transition-all duration-300"
+              />
+            </div>
+            <div className="group">
+              <FeatureCard
+                icon="solar:chart-bold"
+                title="Analytics Hub"
+                description="Deep-dive into performance metrics with filterable data exports for engineers."
+                className="h-full hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 transition-all duration-300"
+              />
+            </div>
+            <div className="group">
+              <FeatureCard
+                icon="solar:star-bold"
+                title="Collaboration"
+                description="Invite your team to review, edit, and approve drafts before they go live."
+                className="h-full hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 transition-all duration-300"
+              />
+            </div>
+            <div className="group">
+              <FeatureCard
+                icon="solar:gallery-download-bold"
+                title="Media Library"
+                description="Cloud-synced storage for all your assets, tagged and ready for deployment."
+                className="h-full hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 transition-all duration-300"
+              />
+            </div>
+            <div className="group">
+              <FeatureCard
+                icon="solar:magic-stick-3-bold"
+                title="AI Captions"
+                description="Coming Soon: Generate platform-optimized copy based on your media assets."
+                isHighlighted={true}
+                badge="ALPHA"
+                className="h-full hover:shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 transition-all duration-300"
+              />
+            </div>
+          </div>
+
+          {/* Bottom accent */}
+          <div className="mt-16 flex items-center justify-center gap-4">
+            <div className="h-px bg-black flex-1 max-w-24"></div>
+            <div className="w-2 h-2 bg-brand-red border border-black"></div>
+            <div className="h-px bg-black flex-1 max-w-24"></div>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section className="bg-white p-8 md:p-20 border-hard-b relative">
-        {/* Abstract Decoration */}
-        <div className="absolute right-0 top-0 p-2 hidden lg:block">
-          <div className="flex gap-1">
-            <div className="w-2 h-2 bg-black" />
-            <div className="w-2 h-2 bg-black opacity-50" />
-            <div className="w-2 h-2 bg-black opacity-20" />
-          </div>
-        </div>
-
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight uppercase leading-none mb-4">
-                Flat Pricing.
-              </h2>
-              <p className="font-mono text-neutral-500">
-                No hidden fees. Cancel anytime.
-              </p>
+      <section
+        id="pricing"
+        className="bg-[#f0f0f0] p-8 md:p-20 border-hard-b relative overflow-hidden"
+      >
+        <div className="max-w-5xl mx-auto relative z-10">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div className="inline-block mb-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-brand-red"></div>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tight uppercase">
+                  Pricing
+                </h2>
+                <div className="w-2 h-2 bg-brand-red"></div>
+              </div>
+              <div className="h-1 bg-black w-24 mx-auto"></div>
             </div>
+            <p className="font-mono text-sm md:text-base text-neutral-600 uppercase tracking-widest">
+              Choose Your Power Level
+            </p>
           </div>
 
           {/* 2 Column Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start justify-center">
-            {/* Tier 1 - Starter */}
-            <Card className="p-8 relative hover:shadow-hard transition-shadow duration-300">
-              <h3 className="font-mono text-xs font-bold uppercase tracking-widest mb-4 text-neutral-500">
-                Starter
-              </h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold tracking-tighter">
-                  Rp 0
-                </span>
-                <span className="text-xs font-mono text-neutral-400">/mo</span>
+            {isLoadingPlans ? (
+              // Loading state - show skeleton or placeholder
+              <>
+                <Card className="p-8 animate-pulse">
+                  <div className="h-8 bg-neutral-200 rounded mb-4"></div>
+                  <div className="h-12 bg-neutral-200 rounded mb-6"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-neutral-200 rounded"></div>
+                    <div className="h-4 bg-neutral-200 rounded"></div>
+                    <div className="h-4 bg-neutral-200 rounded"></div>
+                  </div>
+                </Card>
+                <Card className="p-8 animate-pulse">
+                  <div className="h-8 bg-neutral-200 rounded mb-4"></div>
+                  <div className="h-12 bg-neutral-200 rounded mb-6"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-neutral-200 rounded"></div>
+                    <div className="h-4 bg-neutral-200 rounded"></div>
+                    <div className="h-4 bg-neutral-200 rounded"></div>
+                  </div>
+                </Card>
+              </>
+            ) : plansError || pricingPlans.length === 0 ? (
+              // Error state or no plans - show fallback message
+              <div className="col-span-2 text-center py-12">
+                <p className="font-mono text-sm text-neutral-600">
+                  Unable to load pricing plans. Please try again later.
+                </p>
               </div>
-              <p className="text-sm font-mono leading-relaxed mb-8 border-l-2 border-neutral-200 pl-3 text-neutral-600">
-                Perfect for hobbyists just starting out.
-              </p>
-              <ul className="space-y-3 font-mono text-sm text-neutral-700 mb-8">
-                <li className="flex items-center gap-3">
-                  <Icon icon="solar:check-read-linear" className="text-lg" /> 1
-                  Platform
-                </li>
-                <li className="flex items-center gap-3">
-                  <Icon icon="solar:check-read-linear" className="text-lg" /> 10
-                  Posts / mo
-                </li>
-                <li className="flex items-center gap-3">
-                  <Icon icon="solar:check-read-linear" className="text-lg" />{' '}
-                  Basic Analytics
-                </li>
-              </ul>
-              <Link to={isAuthenticated ? '/dashboard' : '/register'}>
-                <Button
-                  variant="secondary"
-                  className="w-full py-3 px-4 text-xs"
-                >
-                  Start Free
-                </Button>
-              </Link>
-            </Card>
+            ) : (
+              // Render pricing cards from API with original landing page design
+              pricingPlans.map((plan) => (
+                <LandingPricingCard
+                  key={plan.id}
+                  plan={plan}
+                  isRecommended={plan.is_recommended}
+                  formatCurrency={formatCurrency}
+                  navigateTo={getNavigationRoute()}
+                />
+              ))
+            )}
+          </div>
 
-            {/* Tier 2 - Creator (Highlighted) */}
-            <Card className="p-8 bg-black text-white relative shadow-hard transform md:-translate-y-4">
-              <div className="absolute top-0 right-0 bg-brand-neon text-black text-[10px] font-bold px-2 py-1 uppercase font-mono border-l-2 border-b-2 border-black">
-                Best Value
-              </div>
-              <h3 className="font-mono text-xs font-bold uppercase tracking-widest mb-4 text-brand-neon">
-                Creator
-              </h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold tracking-tighter">
-                  Rp 149.000
-                </span>
-                <span className="text-xs font-mono text-neutral-500">/mo</span>
-              </div>
-              <p className="text-sm font-mono leading-relaxed mb-8 border-l-2 border-brand-neon pl-3 text-neutral-300">
-                For serious creators who need scale.
-              </p>
-              <ul className="space-y-3 font-mono text-sm text-neutral-300 mb-8">
-                <li className="flex items-center gap-3">
-                  <Icon
-                    icon="solar:check-circle-bold"
-                    className="text-lg text-brand-neon"
-                  />{' '}
-                  Facebook, Instagram, Threads
-                </li>
-                <li className="flex items-center gap-3">
-                  <Icon
-                    icon="solar:check-circle-bold"
-                    className="text-lg text-brand-neon"
-                  />{' '}
-                  Unlimited Posts
-                </li>
-                <li className="flex items-center gap-3">
-                  <Icon
-                    icon="solar:check-circle-bold"
-                    className="text-lg text-brand-neon"
-                  />{' '}
-                  Advanced Analytics
-                </li>
-                <li className="flex items-center gap-3">
-                  <Icon
-                    icon="solar:check-circle-bold"
-                    className="text-lg text-brand-neon"
-                  />{' '}
-                  Priority Support
-                </li>
-              </ul>
-
-              <Link to={isAuthenticated ? '/dashboard' : '/register'}>
-                <Button className="w-full bg-brand-neon text-black border-2 border-white py-3 px-4 text-xs hover:bg-white! hover:border-brand-neon mb-2">
-                  Start 7-Day Free Trial
-                </Button>
-              </Link>
-              <div className="text-center">
-                <span className="font-mono text-[10px] text-neutral-400 uppercase">
-                  Then Rp 149.000/mo
-                </span>
-              </div>
-            </Card>
+          {/* Bottom note */}
+          <div className="mt-12 text-center">
+            <p className="font-mono text-xs text-neutral-500 uppercase tracking-widest">
+              No hidden fees • Cancel anytime
+            </p>
           </div>
         </div>
       </section>
 
       {/* Who is this for */}
-      <section className="border-hard-b flex flex-col md:flex-row">
+      <section
+        id="audience"
+        className="border-hard-b flex flex-col md:flex-row"
+      >
         <div className="w-full md:w-1/2 border-hard-b md:border-b-0 md:border-hard-r p-12 bg-white">
           <h3 className="font-mono text-xs font-bold uppercase text-neutral-400 mb-6 tracking-widest">
             TARGET AUDIENCE
@@ -500,29 +547,58 @@ export const LandingPage = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-black text-white py-24 px-6 border-hard-b text-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-brand-red via-brand-neon to-brand-red" />
+      <section className="relative border-hard-b overflow-hidden">
+        {/* Top border */}
+        <div className="h-0.5 bg-black"></div>
 
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 uppercase leading-none">
-            Stop reposting.
-            <br />
-            <span className="text-brand-red">Start scheduling.</span>
-          </h2>
+        {/* Main content area with gray dotted sides */}
+        <div className="relative">
+          {/* Gray dotted background on sides */}
+          <div
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(#666 1px, transparent 1px)',
+              backgroundSize: '16px 16px',
+              backgroundPosition: '0 0',
+            }}
+          />
 
-          <Link to={isAuthenticated ? '/dashboard' : '/register'}>
-            <Button
-              variant="secondary"
-              className="text-lg md:text-xl py-5 px-10 shadow-[8px_8px_0px_0px_#ff3333]! hover:bg-white active:shadow-none!"
-            >
-              Start 7-Day Free Trial
-            </Button>
-          </Link>
+          {/* Blue vertical lines */}
+          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-400 z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-400 z-10"></div>
 
-          <p className="font-mono text-xs text-neutral-400 mt-8 uppercase tracking-widest">
-            Set up takes less than 5 minutes.
-          </p>
+          {/* Yellow content block */}
+          <div className="relative z-20 bg-brand-neon py-16 md:py-20 px-6 md:px-12">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex flex-col items-start gap-8">
+                {/* Text content */}
+                <div>
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 uppercase italic">
+                    Ready to Stop Repeating Yourself?
+                  </h2>
+                  <div className="flex items-start gap-3 mb-6">
+                    <div className="w-1 h-6 bg-black mt-1"></div>
+                    <p className="font-mono text-base md:text-lg text-black">
+                      Secure your access to the unified social engine.
+                    </p>
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                <div>
+                  <Link to="/register">
+                    <Button className="bg-black text-white border-2 border-black px-12 py-4 font-mono text-sm md:text-base uppercase whitespace-nowrap shadow-[2px_2px_0px_0px_#000] hover:bg-brand-red hover:text-white hover:shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+                      Get Access
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Bottom border */}
+        <div className="h-0.5 bg-black"></div>
       </section>
 
       <Footer />

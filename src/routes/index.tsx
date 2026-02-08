@@ -14,6 +14,7 @@ import { CalendarPage } from '@/pages/CalendarPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { ConnectionsPage } from '@/pages/ConnectionsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { SubscriptionPage } from '@/pages/SubscriptionPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 import { GoogleOAuthErrorPage } from '@/pages/GoogleOAuthErrorPage';
@@ -152,6 +153,17 @@ const settingsRoute = createRoute({
   },
 });
 
+const subscriptionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/subscription',
+  component: SubscriptionPage,
+  beforeLoad: () => {
+    if (!checkAuth()) {
+      throw redirect({ to: '/login' });
+    }
+  },
+});
+
 const googleOAuthErrorRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/auth/google/error',
@@ -174,6 +186,7 @@ const routeTree = rootRoute.addChildren([
   analyticsRoute,
   connectionsRoute,
   settingsRoute,
+  subscriptionRoute,
   googleOAuthErrorRoute,
   googleOAuthSuccessRoute,
 ]);

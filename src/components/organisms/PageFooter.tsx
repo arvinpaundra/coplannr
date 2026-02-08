@@ -16,7 +16,9 @@ export const PageFooter = ({
   className = '',
 }: PageFooterProps) => {
   return (
-    <footer className={`mt-12 py-6 border-t border-neutral-300 ${className}`}>
+    <footer
+      className={`mt-12 px-4 py-6 border-t border-neutral-300 ${className}`}
+    >
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-neutral-500">
         <div>
           {version} // {build}

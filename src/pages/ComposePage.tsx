@@ -1,19 +1,20 @@
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { PageFooter } from '@/components/layout/PageFooter';
-import { Toggle } from '@/components/ui/Toggle';
+import { Sidebar } from '@/components/organisms/Sidebar';
+import { PageFooter } from '@/components/organisms/PageFooter';
+import { BackgroundGrid } from '@/components/atoms/BackgroundGrid';
+import { Header } from '@/components/organisms/Header';
 import { Button } from '@/components/ui/Button';
-import { Header } from '@/components/layout/Header';
+import { PlatformSelector } from '@/components/organisms/PlatformSelector';
+import { ContentEditor } from '@/components/organisms/ContentEditor';
+import { SchedulePicker } from '@/components/organisms/SchedulePicker';
+import { MediaUploader } from '@/components/organisms/MediaUploader';
 import { usePlatforms } from '@/hooks/usePlatforms';
 
 export const ComposePage = () => {
   const [isScheduled, setIsScheduled] = useState(true);
   const [content, setContent] = useState('');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([
-    'twitter',
-    'linkedin',
-  ]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [settings, setSettings] = useState({
     shortenLinks: true,
@@ -44,11 +45,8 @@ export const ComposePage = () => {
     );
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setMediaFiles([...mediaFiles, ...Array.from(files)]);
-    }
+  const handleFileUpload = (files: File[]) => {
+    setMediaFiles([...mediaFiles, ...files]);
   };
 
   const removeFile = (index: number) => {
@@ -60,439 +58,250 @@ export const ComposePage = () => {
       <Sidebar />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#f8f8f8] relative">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none opacity-20"
-          style={{
-            backgroundImage: 'radial-gradient(#aaa 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        />
+        <BackgroundGrid opacity={0.2} size={20} />
 
         {/* Header */}
         <Header title="COMPOSE" />
 
         {/* Scrollable Form Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 z-10">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Content (2/3) */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Section: Destination */}
-              <div className="bg-white border-2 border-black p-6 shadow-hard-sm">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="font-bold uppercase text-sm flex items-center gap-2">
-                    <Icon icon="solar:link-circle-linear" className="text-lg" />
-                    Select Platforms
-                  </h2>
-                  <span className="text-[10px] font-mono bg-neutral-100 px-2 py-1 border border-black">
-                    MULTIPLE SELECT
-                  </span>
-                </div>
-                {platformsError ? (
-                  <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        icon="solar:danger-triangle-bold"
-                        className="text-base"
-                      />
-                      <span className="font-bold">
-                        Failed to load platforms. Please try again.
-                      </span>
-                    </div>
-                  </div>
-                ) : isLoadingPlatforms ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="w-full p-3 border-2 border-black bg-neutral-100 animate-pulse"
-                      >
-                        <div className="h-4 bg-neutral-300 rounded" />
-                      </div>
-                    ))}
-                  </div>
-                ) : platforms.length === 0 ? (
-                  <div className="text-center py-4 text-sm text-neutral-500 font-mono">
-                    No platforms available
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {platforms.map((platform) => (
-                      <label key={platform.id} className="cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="hidden"
-                          checked={selectedPlatforms.includes(platform.id)}
-                          onChange={() => togglePlatform(platform.id)}
+          <div className="max-w-6xl mx-auto space-y-8">
+            {/* Header Section */}
+            <div className="relative">
+              <div className="border-b-2 border-black pb-6">
+                <h1 className="text-4xl font-bold uppercase tracking-tight mb-3">
+                  Create New Post
+                </h1>
+                <p className="font-mono text-sm text-neutral-600 max-w-2xl">
+                  Compose and schedule content across multiple platforms with
+                  media support.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column: Content (2/3) */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Section: Destination */}
+                <div className="bg-brand-neon border-2 border-black p-6 shadow-hard relative overflow-hidden">
+                  {/* Decorative corner elements */}
+                  <div className="absolute top-0 right-0 w-16 h-16 border-l-2 border-b-2 border-black opacity-20"></div>
+                  <div className="absolute bottom-0 left-0 w-12 h-12 border-r-2 border-t-2 border-black opacity-20"></div>
+
+                  {/* Header */}
+                  <div className="relative z-10 mb-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="font-bold uppercase text-lg flex items-center gap-2">
+                        <Icon
+                          icon="solar:link-circle-linear"
+                          className="text-xl"
                         />
-                        <div
-                          className={`flex items-center justify-center gap-2 w-full p-3 border-2 border-black transition-all ${
-                            selectedPlatforms.includes(platform.id)
-                              ? 'bg-brand-neon shadow-hard-sm -translate-px opacity-100 font-bold'
-                              : 'bg-white opacity-60'
-                          }`}
-                        >
-                          <Icon icon={platform.icon} />
-                          <span className="font-mono text-xs">
-                            {platform.name}
+                        Select Platforms
+                      </h2>
+                      {selectedPlatforms.length > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1 bg-black text-white border-2 border-black">
+                          <span className="font-mono text-xs font-bold">
+                            {selectedPlatforms.length} SELECTED
                           </span>
                         </div>
-                      </label>
-                    ))}
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono bg-white px-2 py-1 border border-black">
+                        MULTIPLE SELECT
+                      </span>
+                      {selectedPlatforms.length === 0 && (
+                        <span className="font-mono text-xs text-neutral-600">
+                          Choose one or more platforms
+                        </span>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
 
-              {/* Section: Editor */}
-              <div className="bg-white border-2 border-black p-6 shadow-hard relative">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="font-bold uppercase text-sm flex items-center gap-2">
-                    <Icon
-                      icon="solar:pen-new-square-linear"
-                      className="text-lg"
+                  {/* Platform Selector */}
+                  <div className="relative z-10">
+                    <PlatformSelector
+                      platforms={platforms}
+                      selected={selectedPlatforms}
+                      onToggle={togglePlatform}
+                      isLoading={isLoadingPlatforms}
+                      error={
+                        platformsError
+                          ? 'Failed to load platforms. Please try again.'
+                          : null
+                      }
                     />
-                    Content Payload
-                  </h2>
-                  {/* <button className="text-xs font-mono hover:underline flex items-center gap-1">
-                    <Icon icon="solar:magic-stick-3-linear" /> AI Assist
-                  </button> */}
+                  </div>
                 </div>
 
-                <textarea
+                {/* Section: Editor */}
+                <ContentEditor
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="w-full h-64 border-0 outline-none resize-none font-mono text-sm leading-relaxed p-2 -ml-2 bg-transparent"
+                  onChange={setContent}
+                  maxLength={280}
                   placeholder="Type your update here... Use @ to mention or # for tags."
                 />
 
-                <div className="flex justify-between items-center pt-4 border-t-2 border-neutral-100 mt-2">
-                  <div className="flex gap-2 text-neutral-400">
-                    <button className="hover:text-black">
-                      <Icon
-                        icon="solar:smile-circle-linear"
-                        className="text-xl"
-                      />
-                    </button>
-                    <button className="hover:text-black">
-                      <Icon
-                        icon="solar:hashtag-square-linear"
-                        className="text-xl"
-                      />
-                    </button>
-                    <button className="hover:text-black">
-                      <Icon icon="solar:map-point-linear" className="text-xl" />
-                    </button>
-                  </div>
-                  <div className="font-mono text-xs">
-                    <span
-                      className={`font-bold ${
-                        content.length > 280
-                          ? 'text-brand-red'
-                          : 'text-green-600'
-                      }`}
-                    >
-                      {content.length}
-                    </span>
-                    <span className="text-neutral-400">/280</span>
-                  </div>
-                </div>
-              </div>
+                {/* Section: Media */}
+                <div className="bg-white border-2 border-black p-6 shadow-hard-sm relative overflow-hidden">
+                  {/* Decorative accent line at top */}
+                  <div className="absolute top-0 left-0 w-full h-2 bg-brand-red -translate-y-px"></div>
+                  {/* Decorative corner element */}
+                  <div className="absolute bottom-0 right-0 w-16 h-16 border-l-2 border-t-2 border-black opacity-20"></div>
 
-              {/* Section: Media */}
-              <div className="bg-white border-2 border-black p-6 shadow-hard-sm">
-                <h2 className="font-bold uppercase text-sm mb-4 flex items-center gap-2">
-                  <Icon icon="solar:gallery-wide-linear" className="text-lg" />
-                  Attachments
-                </h2>
-
-                {/* Upload Area */}
-                <label className="block w-full p-8 border-2 border-dashed border-black bg-[#f8f8f8] hover:bg-white hover:border-solid hover:shadow-hard-sm transition-all cursor-pointer text-center group">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*,video/mp4"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Icon
-                    icon="solar:cloud-upload-linear"
-                    className="text-4xl mb-3 text-neutral-400 group-hover:text-black transition-colors mx-auto"
-                  />
-                  <p className="font-bold text-sm">Drop assets here</p>
-                  <p className="font-mono text-xs text-neutral-500 mt-1">
-                    JPG, PNG, MP4 up to 50MB
-                  </p>
-                  <div className="mt-4 inline-block px-4 py-2 border border-black bg-white text-xs font-mono uppercase hover:bg-black hover:text-white transition-colors">
-                    Browse Files
-                  </div>
-                </label>
-
-                {/* Preview List */}
-                {mediaFiles.length > 0 && (
-                  <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
-                    {mediaFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="relative w-24 h-24 border border-black shrink-0 bg-neutral-100"
-                      >
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-full object-cover grayscale"
+                  {/* Header */}
+                  <div className="relative z-10 mb-6 pt-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="font-bold uppercase text-lg flex items-center gap-2">
+                        <Icon
+                          icon="solar:gallery-wide-linear"
+                          className="text-xl"
                         />
-                        <button
-                          onClick={() => removeFile(index)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-brand-red border border-black text-white flex items-center justify-center hover:scale-110 transition-transform"
-                        >
-                          <Icon icon="solar:trash-bin-minimalistic-linear" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column: Scheduling & Settings (1/3) */}
-            <div className="space-y-6">
-              {/* Timing Control */}
-              <div className="bg-brand-neon border-2 border-black p-6 shadow-hard relative">
-                <div className="absolute top-2 right-2">
-                  <Icon
-                    icon="solar:clock-circle-linear"
-                    className="text-2xl opacity-50"
-                  />
-                </div>
-                <h2 className="font-bold uppercase text-lg mb-6">Timing</h2>
-
-                {/* Toggle Switch */}
-                <div className="flex items-center justify-between mb-6 bg-white/50 p-2 border border-black">
-                  <span className="font-mono text-xs font-bold uppercase">
-                    Schedule Post?
-                  </span>
-                  <Toggle
-                    checked={isScheduled}
-                    onChange={setIsScheduled}
-                    label=""
-                  />
-                </div>
-
-                {/* Date Picker UI */}
-                {isScheduled && (
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="font-mono text-[10px] uppercase">
-                        Date
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={scheduleDate.day}
-                          onChange={(e) =>
-                            setScheduleDate({
-                              ...scheduleDate,
-                              day: e.target.value,
-                            })
-                          }
-                          className="w-12 bg-white text-center border-2 border-black p-2 font-mono text-sm outline-none"
-                          placeholder="DD"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleDate.month}
-                          onChange={(e) =>
-                            setScheduleDate({
-                              ...scheduleDate,
-                              month: e.target.value,
-                            })
-                          }
-                          className="w-14 bg-white text-center border-2 border-black p-2 font-mono text-sm outline-none"
-                          placeholder="MM"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleDate.year}
-                          onChange={(e) =>
-                            setScheduleDate({
-                              ...scheduleDate,
-                              year: e.target.value,
-                            })
-                          }
-                          className="flex-1 bg-white text-center border-2 border-black p-2 font-mono text-sm outline-none"
-                          placeholder="YYYY"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="font-mono text-[10px] uppercase">
-                        Time (UTC)
-                      </label>
-                      <div className="flex gap-2 items-center">
-                        <input
-                          type="text"
-                          value={scheduleDate.hour}
-                          onChange={(e) =>
-                            setScheduleDate({
-                              ...scheduleDate,
-                              hour: e.target.value,
-                            })
-                          }
-                          className="w-12 bg-white text-center border-2 border-black p-2 font-mono text-sm outline-none"
-                          placeholder="HH"
-                        />
-                        <span className="font-bold">:</span>
-                        <input
-                          type="text"
-                          value={scheduleDate.minute}
-                          onChange={(e) =>
-                            setScheduleDate({
-                              ...scheduleDate,
-                              minute: e.target.value,
-                            })
-                          }
-                          className="w-12 bg-white text-center border-2 border-black p-2 font-mono text-sm outline-none"
-                          placeholder="MM"
-                        />
-                        <div className="flex flex-1 border-2 border-black bg-white">
-                          <button
-                            onClick={() =>
-                              setScheduleDate({ ...scheduleDate, period: 'AM' })
-                            }
-                            className={`flex-1 font-mono text-xs p-2 transition-colors ${
-                              scheduleDate.period === 'AM'
-                                ? 'bg-black text-white'
-                                : 'hover:bg-black hover:text-white'
-                            }`}
-                          >
-                            AM
-                          </button>
-                          <button
-                            onClick={() =>
-                              setScheduleDate({ ...scheduleDate, period: 'PM' })
-                            }
-                            className={`flex-1 font-mono text-xs p-2 transition-colors ${
-                              scheduleDate.period === 'PM'
-                                ? 'bg-black text-white'
-                                : 'hover:bg-black hover:text-white'
-                            }`}
-                          >
-                            PM
-                          </button>
+                        Attachments
+                      </h2>
+                      {mediaFiles.length > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1 bg-brand-red text-white border-2 border-black shadow-hard-sm">
+                          <Icon icon="solar:gallery-bold" className="text-sm" />
+                          <span className="font-mono text-xs font-bold">
+                            {mediaFiles.length} FILE
+                            {mediaFiles.length !== 1 ? 'S' : ''}
+                          </span>
                         </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono bg-neutral-100 px-2 py-1 border border-black">
+                        IMAGES & VIDEOS
+                      </span>
+                      {mediaFiles.length === 0 && (
+                        <span className="font-mono text-xs text-neutral-500">
+                          Add media to enhance your post
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Media Uploader */}
+                  <div className="relative z-10">
+                    <MediaUploader
+                      accept="image/*,video/mp4"
+                      multiple
+                      onUpload={handleFileUpload}
+                      files={mediaFiles}
+                      onRemove={removeFile}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Scheduling & Settings (1/3) */}
+              <div className="space-y-6">
+                {/* Timing Control */}
+                <SchedulePicker
+                  isScheduled={isScheduled}
+                  onScheduledChange={setIsScheduled}
+                  scheduleDate={scheduleDate}
+                  onDateChange={setScheduleDate}
+                />
+
+                {/* Post Metadata */}
+                <div className="bg-white border-2 border-black p-6 shadow-hard-sm">
+                  <h2 className="font-bold uppercase text-sm mb-4">
+                    Post Metadata
+                  </h2>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="font-mono text-[10px] uppercase block mb-2">
+                        Internal Tags
+                      </label>
+                      <input
+                        type="text"
+                        value={internalTags}
+                        onChange={(e) => setInternalTags(e.target.value)}
+                        className="w-full p-2 text-xs font-mono border-2 border-black bg-white outline-none focus:shadow-[2px_2px_0px_0px_#ccff00] transition-shadow"
+                        placeholder="e.g. #campaign-alpha #q4-2024"
+                      />
+                      <p className="font-mono text-[10px] text-neutral-500 mt-1">
+                        Separate tags with spaces
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-dashed border-black">
+                      <label className="font-mono text-[10px] uppercase block mb-2">
+                        Platform-Specific Options
+                      </label>
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={settings.shortenLinks}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                shortenLinks: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 border-2 border-black appearance-none checked:bg-brand-neon checked:border-black"
+                          />
+                          <span className="font-mono text-xs">
+                            Auto-shorten URLs
+                          </span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={settings.autoRetweet}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                autoRetweet: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 border-2 border-black appearance-none checked:bg-brand-neon checked:border-black"
+                          />
+                          <span className="font-mono text-xs text-neutral-500">
+                            Auto-retweet (X/Twitter only)
+                          </span>
+                        </label>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Additional Settings */}
-              <div className="bg-white border-2 border-black p-6 shadow-hard-sm">
-                <h2 className="font-bold uppercase text-sm mb-4">
-                  Post Settings
-                </h2>
-
+                {/* Main Actions */}
                 <div className="space-y-3">
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div
-                      className={`w-5 h-5 border-2 border-black flex items-center justify-center bg-white group-hover:bg-neutral-100 ${
-                        settings.shortenLinks ? '' : ''
-                      }`}
-                      onClick={() =>
-                        setSettings({
-                          ...settings,
-                          shortenLinks: !settings.shortenLinks,
-                        })
-                      }
+                  {isScheduled ? (
+                    <Button
+                      variant="primary"
+                      className="w-full py-4 text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#ccff00]! hover:shadow-[6px_6px_0px_0px_#ccff00]! active:shadow-[2px_2px_0px_0px_#ccff00]! hover:-translate-x-px! hover:-translate-y-px! active:translate-x-0.5! active:translate-y-0.5!"
                     >
-                      {settings.shortenLinks && (
-                        <Icon
-                          icon="solar:check-read-linear"
-                          className="text-black text-sm"
-                        />
-                      )}
-                    </div>
-                    <span className="font-mono text-xs">Shorten Links</span>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div
-                      className="w-5 h-5 border-2 border-black flex items-center justify-center bg-white group-hover:bg-neutral-100"
-                      onClick={() =>
-                        setSettings({
-                          ...settings,
-                          autoRetweet: !settings.autoRetweet,
-                        })
-                      }
+                      <Icon icon="solar:rocket-linear" className="text-xl" />
+                      Schedule Post
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      className="w-full py-4 text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#ccff00]! hover:shadow-[6px_6px_0px_0px_#ccff00]! active:shadow-[2px_2px_0px_0px_#ccff00]! hover:-translate-x-px! hover:-translate-y-px! active:translate-x-0.5! active:translate-y-0.5!"
                     >
-                      {settings.autoRetweet && (
-                        <Icon
-                          icon="solar:check-read-linear"
-                          className="text-black text-sm"
-                        />
-                      )}
-                    </div>
-                    <span className="font-mono text-xs text-neutral-500">
-                      Auto-Retweet (X only)
-                    </span>
-                  </label>
+                      <Icon icon="solar:rocket-linear" className="text-xl" />
+                      Post Now
+                    </Button>
+                  )}
 
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div
-                      className="w-5 h-5 border-2 border-black flex items-center justify-center bg-white group-hover:bg-neutral-100"
-                      onClick={() =>
-                        setSettings({
-                          ...settings,
-                          addFirstComment: !settings.addFirstComment,
-                        })
-                      }
-                    >
-                      {settings.addFirstComment && (
-                        <Icon
-                          icon="solar:check-read-linear"
-                          className="text-black text-sm"
-                        />
-                      )}
-                    </div>
-                    <span className="font-mono text-xs">Add First Comment</span>
-                  </label>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-dashed border-black">
-                  <label className="font-mono text-[10px] uppercase block mb-1">
-                    Internal Tags
-                  </label>
-                  <input
-                    type="text"
-                    value={internalTags}
-                    onChange={(e) => setInternalTags(e.target.value)}
-                    className="w-full p-2 text-xs font-mono border-2 border-black bg-white outline-none focus:shadow-[2px_2px_0px_0px_#ccff00] transition-shadow"
-                    placeholder="e.g. #campaign-alpha"
-                  />
+                  <Button
+                    variant="secondary"
+                    className="w-full py-4 text-sm flex items-center justify-center gap-2 border-2 border-black hover:bg-brand-neon hover:shadow-[2px_2px_0px_0px_#000] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all"
+                  >
+                    <Icon icon="solar:diskette-linear" className="text-xl" />
+                    Save as Draft
+                  </Button>
                 </div>
               </div>
-
-              {/* Main Actions */}
-              {isScheduled ? (
-                <Button
-                  variant="primary"
-                  className="w-full py-4 text-sm flex items-center justify-center gap-1 shadow-[4px_4px_0px_0px_#ccff00]! hover:shadow-[6px_6px_0px_0px_#ccff00]! active:shadow-[2px_2px_0px_0px_#ccff00]! hover:-translate-x-px! hover:-translate-y-px! active:translate-x-0.5! active:translate-y-0.5!"
-                >
-                  <Icon icon="solar:rocket-linear" className="text-xl" />
-                  Schedule Post
-                </Button>
-              ) : (
-                <Button
-                  variant="primary"
-                  className="w-full py-4 text-sm flex items-center justify-center gap-1 shadow-[4px_4px_0px_0px_#ccff00]! hover:shadow-[6px_6px_0px_0px_#ccff00]! active:shadow-[2px_2px_0px_0px_#ccff00]! hover:-translate-x-px! hover:-translate-y-px! active:translate-x-0.5! active:translate-y-0.5!"
-                >
-                  <Icon icon="solar:rocket-linear" className="text-xl" />
-                  Post Now
-                </Button>
-              )}
             </div>
-          </div>
 
-          <PageFooter />
+            <PageFooter />
+          </div>
         </div>
       </main>
     </div>

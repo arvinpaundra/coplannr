@@ -4,6 +4,12 @@ import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { BackgroundGrid } from '@/components/atoms/BackgroundGrid';
+import { BrandLogo } from '@/components/atoms/BrandLogo';
+import { Alert } from '@/components/molecules/Alert';
+import { FormField } from '@/components/molecules/FormField';
+import { Divider } from '@/components/atoms/Divider';
+import { LoadingSpinner } from '@/components/atoms/LoadingSpinner';
 import { useLogin, useGoogleOAuth } from '@/hooks/useAuth';
 import { useAuthContext } from '@/contexts/auth-utils';
 
@@ -61,23 +67,11 @@ export const LoginPage = () => {
 
   return (
     <div className="flex min-h-screen w-screen items-center justify-center relative overflow-hidden">
-      {/* Background Grid */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none opacity-20"
-        style={{
-          backgroundImage: 'radial-gradient(#aaa 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }}
-      />
+      <BackgroundGrid opacity={0.2} size={20} />
 
       {/* Decorative Brand */}
       <div className="absolute top-0 left-0 p-8 hidden md:block">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-brand-red border-2 border-black" />
-          <span className="font-bold tracking-tight uppercase text-lg">
-            COPLANNR.XYZ
-          </span>
-        </div>
+        <BrandLogo size="sm" />
       </div>
 
       {/* Login Card */}
@@ -99,23 +93,11 @@ export const LoginPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {errorMessage && (
-              <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    icon="solar:danger-triangle-bold"
-                    className="text-base"
-                  />
-                  <span className="font-bold">{errorMessage}</span>
-                </div>
-              </div>
-            )}
+            {errorMessage && <Alert variant="error" message={errorMessage} />}
 
-            <div className="space-y-1">
-              <label className="block font-bold text-xs uppercase tracking-wide">
-                Email
-              </label>
+            <FormField label="Email" htmlFor="email" required>
               <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -123,13 +105,15 @@ export const LoginPage = () => {
                 icon={<Icon icon="solar:letter-linear" />}
                 required
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <label className="block font-bold text-xs uppercase tracking-wide">
-                  Password
-                </label>
+            <FormField
+              label="Password"
+              htmlFor="password"
+              required
+              className="space-y-1"
+            >
+              <div className="flex justify-between items-center mb-1">
                 <a
                   href="#"
                   className="text-[10px] uppercase font-bold tracking-wide text-neutral-500 hover:text-black hover:underline decoration-2 decoration-brand-neon"
@@ -138,6 +122,7 @@ export const LoginPage = () => {
                 </a>
               </div>
               <Input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -145,7 +130,7 @@ export const LoginPage = () => {
                 icon={<Icon icon="solar:lock-password-linear" />}
                 required
               />
-            </div>
+            </FormField>
 
             <div className="pt-1 pb-1">
               <Checkbox
@@ -162,7 +147,7 @@ export const LoginPage = () => {
             >
               {loginMutation.isPending ? (
                 <>
-                  <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                  <LoadingSpinner size="md" />
                   Signing In...
                 </>
               ) : (
@@ -174,17 +159,7 @@ export const LoginPage = () => {
             </Button>
           </form>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-300" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase font-mono">
-              <span className="bg-white px-2 text-neutral-400">
-                Or continue with
-              </span>
-            </div>
-          </div>
+          <Divider text="Or continue with" className="my-6" />
 
           {/* Google Login */}
           <Button
@@ -198,7 +173,7 @@ export const LoginPage = () => {
           >
             {googleOAuthMutation.isPending ? (
               <>
-                <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                <LoadingSpinner size="md" />
                 <span>Redirecting...</span>
               </>
             ) : (

@@ -3,6 +3,12 @@ import { Link } from '@tanstack/react-router';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { BackgroundGrid } from '@/components/atoms/BackgroundGrid';
+import { BrandLogo } from '@/components/atoms/BrandLogo';
+import { Alert } from '@/components/molecules/Alert';
+import { FormField } from '@/components/molecules/FormField';
+import { Divider } from '@/components/atoms/Divider';
+import { LoadingSpinner } from '@/components/atoms/LoadingSpinner';
 import { useRegister, useGoogleOAuth } from '@/hooks/useAuth';
 import { getFormErrorsFromApiResponse } from '@/lib/utils/api-errors';
 
@@ -71,23 +77,11 @@ export const RegisterPage = () => {
 
   return (
     <div className="flex min-h-screen w-screen items-center justify-center relative overflow-hidden">
-      {/* Background Grid */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none opacity-20"
-        style={{
-          backgroundImage: 'radial-gradient(#aaa 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }}
-      />
+      <BackgroundGrid opacity={0.2} size={20} />
 
       {/* Decorative Brand */}
       <div className="absolute top-0 left-0 p-8 hidden md:block">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-brand-red border-2 border-black" />
-          <span className="font-bold tracking-tight uppercase text-lg">
-            COPLANNR.XYZ
-          </span>
-        </div>
+        <BrandLogo size="sm" />
       </div>
 
       {/* Register Card */}
@@ -109,23 +103,16 @@ export const RegisterPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {errorMessage && (
-              <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    icon="solar:danger-triangle-bold"
-                    className="text-base"
-                  />
-                  <span className="font-bold">{errorMessage}</span>
-                </div>
-              </div>
-            )}
+            {errorMessage && <Alert variant="error" message={errorMessage} />}
 
-            <div className="space-y-1">
-              <label className="block font-bold text-xs uppercase tracking-wide">
-                Full Name
-              </label>
+            <FormField
+              label="Full Name"
+              htmlFor="fullname"
+              required
+              error={fieldErrors.fullname}
+            >
               <Input
+                id="fullname"
                 type="text"
                 value={fullname}
                 onChange={(e) => setFullname(e.target.value)}
@@ -133,18 +120,16 @@ export const RegisterPage = () => {
                 icon={<Icon icon="solar:user-circle-linear" />}
                 required
               />
-              {fieldErrors.fullname && (
-                <p className="text-xs text-red-600 mt-1">
-                  {fieldErrors.fullname}
-                </p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="space-y-1">
-              <label className="block font-bold text-xs uppercase tracking-wide">
-                Email Address
-              </label>
+            <FormField
+              label="Email Address"
+              htmlFor="email"
+              required
+              error={fieldErrors.email}
+            >
               <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -152,16 +137,16 @@ export const RegisterPage = () => {
                 icon={<Icon icon="solar:letter-linear" />}
                 required
               />
-              {fieldErrors.email && (
-                <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="space-y-1">
-              <label className="block font-bold text-xs uppercase tracking-wide">
-                Password
-              </label>
+            <FormField
+              label="Password"
+              htmlFor="password"
+              required
+              error={fieldErrors.password}
+            >
               <Input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -170,12 +155,7 @@ export const RegisterPage = () => {
                 required
                 minLength={8}
               />
-              {fieldErrors.password && (
-                <p className="text-xs text-red-600 mt-1">
-                  {fieldErrors.password}
-                </p>
-              )}
-            </div>
+            </FormField>
 
             <div className="pt-2 pb-2">
               <label className="flex items-start gap-3 cursor-pointer group">
@@ -242,7 +222,7 @@ export const RegisterPage = () => {
             >
               {registerMutation.isPending ? (
                 <>
-                  <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                  <LoadingSpinner size="md" />
                   Creating Account...
                 </>
               ) : (
@@ -254,17 +234,7 @@ export const RegisterPage = () => {
             </Button>
           </form>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-300" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase font-mono">
-              <span className="bg-white px-2 text-neutral-400">
-                Or continue with
-              </span>
-            </div>
-          </div>
+          <Divider text="Or continue with" className="my-6" />
 
           {/* Google Login */}
           <Button
@@ -278,7 +248,7 @@ export const RegisterPage = () => {
           >
             {googleOAuthMutation.isPending ? (
               <>
-                <Icon icon="svg-spinners:ring-resize" className="text-lg" />
+                <LoadingSpinner size="md" />
                 <span>Redirecting...</span>
               </>
             ) : (

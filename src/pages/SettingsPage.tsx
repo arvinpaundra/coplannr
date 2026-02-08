@@ -1,11 +1,15 @@
 import { useState, useEffect, startTransition } from 'react';
 import { Icon } from '@iconify/react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
-import { PageFooter } from '@/components/layout/PageFooter';
+import { Sidebar } from '@/components/organisms/Sidebar';
+import { Header } from '@/components/organisms/Header';
+import { PageFooter } from '@/components/organisms/PageFooter';
+import { BackgroundGrid } from '@/components/atoms/BackgroundGrid';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { Alert } from '@/components/molecules/Alert';
+import { FormField } from '@/components/molecules/FormField';
+import { LoadingSpinner } from '@/components/atoms/LoadingSpinner';
 import { useAuthContext } from '@/contexts/auth-utils';
 import { useUpdateProfile } from '@/hooks/useAuth';
 import { getFormErrorsFromApiResponse } from '@/lib/utils/api-errors';
@@ -91,167 +95,195 @@ export const SettingsPage = () => {
       <Sidebar />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#f8f8f8] relative">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none opacity-20"
-          style={{
-            backgroundImage: 'radial-gradient(#aaa 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        />
+        <BackgroundGrid opacity={0.2} size={20} />
 
         <Header title="SETTINGS" />
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8 z-10">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="border-b-2 border-black pb-4">
-              <h1 className="text-3xl font-bold uppercase tracking-tight">
-                System Settings
-              </h1>
-              <p className="font-mono text-sm text-neutral-600 mt-2">
-                Configure your account and preferences.
-              </p>
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Header Section */}
+            <div className="relative">
+              <div className="border-b-2 border-black pb-6">
+                <h1 className="text-4xl font-bold uppercase tracking-tight mb-3">
+                  Account Settings
+                </h1>
+                <p className="font-mono text-sm text-neutral-600 max-w-2xl">
+                  Manage your profile information and notification preferences.
+                </p>
+              </div>
             </div>
 
             {/* Profile */}
-            <Card className="p-6">
-              <h2 className="font-bold uppercase text-lg mb-4 flex items-center gap-2">
-                <Icon icon="solar:user-circle-linear" />
-                Profile Information
-              </h2>
-              <form
-                key={user?.id}
-                onSubmit={handleSubmit}
-                className="space-y-4"
-              >
-                {errorMessage && (
-                  <div className="bg-red-50 border-2 border-red-500 p-3 text-xs text-red-700">
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        icon="solar:danger-triangle-bold"
-                        className="text-base"
-                      />
-                      <span className="font-bold">{errorMessage}</span>
-                    </div>
-                  </div>
-                )}
+            <Card className="p-6 md:p-8 relative overflow-hidden">
+              {/* Decorative accent line at top */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-brand-red -translate-y-px"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-6">
+                  <Icon
+                    icon="solar:user-circle-linear"
+                    className="text-2xl text-black"
+                  />
+                  <h2 className="font-bold uppercase text-lg">
+                    Profile Information
+                  </h2>
+                </div>
 
-                {successMessage && (
-                  <div className="bg-green-50 border-2 border-green-500 p-3 text-xs text-green-700">
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        icon="solar:check-circle-bold"
-                        className="text-base"
-                      />
-                      <span className="font-bold">{successMessage}</span>
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block font-bold text-xs uppercase tracking-wide mb-2">
-                    Full Name
-                  </label>
-                  <Input
-                    value={formData.fullname}
-                    placeholder="e.g. John System"
-                    onChange={(e) =>
-                      setFormData({ ...formData, fullname: e.target.value })
-                    }
-                    required
-                  />
-                  {fieldErrors.fullname && (
-                    <p className="text-xs text-red-600 mt-1">
-                      {fieldErrors.fullname}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block font-bold text-xs uppercase tracking-wide mb-2">
-                    Email Address
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="e.g. john@coplannr.xyz"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    required
-                  />
-                  {fieldErrors.email && (
-                    <p className="text-xs text-red-600 mt-1">
-                      {fieldErrors.email}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block font-bold text-xs uppercase tracking-wide mb-2">
-                    Company / Organization
-                  </label>
-                  <Input
-                    value={formData.orgName}
-                    placeholder="e.g. Coplannr Inc."
-                    onChange={(e) =>
-                      setFormData({ ...formData, orgName: e.target.value })
-                    }
-                  />
-                  {fieldErrors.org_name && (
-                    <p className="text-xs text-red-600 mt-1">
-                      {fieldErrors.org_name}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  type="submit"
-                  className="px-6 py-2"
-                  disabled={updateProfileMutation.isPending}
+                <form
+                  key={user?.id}
+                  onSubmit={handleSubmit}
+                  className="space-y-5"
                 >
-                  {updateProfileMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        icon="svg-spinners:ring-resize"
-                        className="text-lg"
-                      />
-                      Saving...
-                    </div>
-                  ) : (
-                    'Save Changes'
+                  {errorMessage && (
+                    <Alert variant="error" message={errorMessage} />
                   )}
-                </Button>
-              </form>
+                  {successMessage && (
+                    <Alert variant="success" message={successMessage} />
+                  )}
+
+                  {/* Email - First, Disabled */}
+                  <FormField
+                    label="Email Address"
+                    htmlFor="email"
+                    required
+                    error={fieldErrors.email}
+                  >
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="e.g. john@coplannr.xyz"
+                      value={formData.email}
+                      disabled
+                      className="bg-neutral-100 cursor-not-allowed"
+                    />
+                    <p className="font-mono text-[10px] text-neutral-500 mt-1">
+                      Email cannot be changed
+                    </p>
+                  </FormField>
+
+                  {/* Full Name */}
+                  <FormField
+                    label="Full Name"
+                    htmlFor="fullname"
+                    required
+                    error={fieldErrors.fullname}
+                  >
+                    <Input
+                      id="fullname"
+                      value={formData.fullname}
+                      placeholder="e.g. John System"
+                      onChange={(e) =>
+                        setFormData({ ...formData, fullname: e.target.value })
+                      }
+                      required
+                    />
+                  </FormField>
+
+                  {/* Organization */}
+                  <FormField
+                    label="Company / Organization"
+                    htmlFor="orgName"
+                    error={fieldErrors.org_name}
+                  >
+                    <Input
+                      id="orgName"
+                      value={formData.orgName}
+                      placeholder="e.g. Coplannr Inc."
+                      onChange={(e) =>
+                        setFormData({ ...formData, orgName: e.target.value })
+                      }
+                    />
+                  </FormField>
+
+                  <div className="pt-4 border-t-2 border-dashed border-neutral-200">
+                    <Button
+                      type="submit"
+                      className="px-6 py-3 flex items-center gap-2"
+                      disabled={updateProfileMutation.isPending}
+                    >
+                      {updateProfileMutation.isPending ? (
+                        <>
+                          <LoadingSpinner size="md" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Icon
+                            icon="solar:diskette-linear"
+                            className="text-lg"
+                          />
+                          Save Changes
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </div>
             </Card>
 
             {/* Notifications */}
-            <Card className="p-6">
-              <h2 className="font-bold uppercase text-lg mb-4 flex items-center gap-2">
-                <Icon icon="solar:bell-linear" />
-                Notifications
-              </h2>
-              <div className="space-y-3 mb-4">
-                {[
-                  { label: 'Email me when posts are published', checked: true },
-                  { label: 'Email me when posts fail', checked: true },
-                  { label: 'Weekly performance summary', checked: true },
-                  {
-                    label: 'New platform integrations available',
-                    checked: false,
-                  },
-                ].map((item) => (
-                  <label
-                    key={item.label}
-                    className="flex items-center gap-3 border-2 border-transparent cursor-pointer transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      defaultChecked={item.checked}
-                      className="w-5 h-5 border-2 border-black appearance-none checked:bg-brand-neon cursor-pointer"
-                    />
-                    <span className="text-sm">{item.label}</span>
-                  </label>
-                ))}
-              </div>
+            <Card className="p-6 md:p-8 relative overflow-hidden">
+              {/* Decorative accent line at top */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-brand-red -translate-y-px"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-6">
+                  <Icon
+                    icon="solar:bell-linear"
+                    className="text-2xl text-black"
+                  />
+                  <h2 className="font-bold uppercase text-lg">Notifications</h2>
+                </div>
 
-              <Button className="px-6 py-2">Set Preferences</Button>
+                <div className="space-y-4 mb-6">
+                  {[
+                    {
+                      label: 'Email me when posts are published',
+                      checked: true,
+                      icon: 'solar:letter-linear',
+                    },
+                    {
+                      label: 'Email me when posts fail',
+                      checked: true,
+                      icon: 'solar:danger-triangle-linear',
+                    },
+                    {
+                      label: 'Weekly performance summary',
+                      checked: true,
+                      icon: 'solar:chart-2-linear',
+                    },
+                    {
+                      label: 'New platform integrations available',
+                      checked: false,
+                      icon: 'solar:link-circle-linear',
+                    },
+                  ].map((item) => (
+                    <label
+                      key={item.label}
+                      className="flex items-center gap-3 p-3 border-2 border-black bg-white hover:bg-brand-neon/10 hover:shadow-hard-sm hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all duration-200 cursor-pointer group"
+                    >
+                      <input
+                        type="checkbox"
+                        defaultChecked={item.checked}
+                        className="w-5 h-5 border-2 border-black appearance-none checked:bg-brand-neon cursor-pointer"
+                      />
+                      <Icon
+                        icon={item.icon}
+                        className="text-lg text-neutral-500 group-hover:text-black transition-colors"
+                      />
+                      <span className="text-sm flex-1">{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="pt-4 border-t-2 border-dashed border-neutral-200">
+                  <Button className="px-6 py-3 flex items-center gap-2">
+                    <Icon
+                      icon="solar:check-circle-linear"
+                      className="text-lg"
+                    />
+                    Set Preferences
+                  </Button>
+                </div>
+              </div>
             </Card>
 
             {/* Timezone */}
