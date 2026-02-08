@@ -23,10 +23,14 @@ export const ContentEditor = ({
   ...props
 }: ContentEditorProps) => {
   const isOverLimit = value.length > maxLength;
-  const remainingChars = maxLength - value.length;
 
   return (
-    <div className={cn('bg-white border-2 border-black p-6 shadow-hard relative', className)}>
+    <div
+      className={cn(
+        'bg-white border-2 border-black p-6 shadow-hard relative',
+        className
+      )}
+    >
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

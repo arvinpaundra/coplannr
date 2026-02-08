@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes } from 'react';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';

@@ -3,7 +3,11 @@ import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 import type { CalendarEvent, CalendarDay } from '@/pages/CalendarPage';
 
-export interface CalendarDayCellProps extends HTMLAttributes<HTMLDivElement> {
+export interface CalendarDayCellProps
+  extends Omit<
+    HTMLAttributes<HTMLDivElement>,
+    'onDragOver' | 'onDrop' | 'onDragStart' | 'onDragEnd'
+  > {
   day: CalendarDay;
   draggedEvent?: CalendarEvent | null;
   dragOverDate?: string | null;
@@ -161,9 +165,7 @@ export const CalendarDayCell = ({
               icon="solar:calendar-add-linear"
               className="text-2xl text-brand-neon mx-auto mb-1"
             />
-            <p className="font-mono text-[10px] text-neutral-600">
-              Drop here
-            </p>
+            <p className="font-mono text-[10px] text-neutral-600">Drop here</p>
           </div>
         )}
 

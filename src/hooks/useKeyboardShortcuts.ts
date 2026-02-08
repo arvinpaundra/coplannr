@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 
 export interface KeyboardShortcut {
   key: string;
@@ -50,7 +49,9 @@ export const useKeyboardShortcuts = (
       // Check each shortcut
       for (const shortcut of shortcuts) {
         const keyMatch = e.key.toLowerCase() === shortcut.key.toLowerCase();
-        const ctrlMatch = shortcut.ctrl ? e.ctrlKey || e.metaKey : !e.ctrlKey && !e.metaKey;
+        const ctrlMatch = shortcut.ctrl
+          ? e.ctrlKey || e.metaKey
+          : !e.ctrlKey && !e.metaKey;
         const shiftMatch = shortcut.shift ? e.shiftKey : !e.shiftKey;
 
         if (keyMatch && ctrlMatch && shiftMatch) {

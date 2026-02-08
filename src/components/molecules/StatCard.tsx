@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes } from 'react';
 import { Icon } from '@iconify/react';
 import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
@@ -27,7 +27,8 @@ export const StatCard = ({
 }: StatCardProps) => {
   const variantStyles = {
     default: '',
-    highlight: 'bg-[#fff0f0] border-brand-red! shadow-[2px_2px_0px_0px_#ff3333]!',
+    highlight:
+      'bg-[#fff0f0] border-brand-red! shadow-[2px_2px_0px_0px_#ff3333]!',
     danger: 'bg-[#fff5f5] border-brand-red',
   };
 
@@ -51,7 +52,10 @@ export const StatCard = ({
             variant === 'danger' && 'text-brand-red'
           )}
         >
-          <Icon icon={icon} className="text-6xl group-hover:scale-110 transition-transform duration-300" />
+          <Icon
+            icon={icon}
+            className="text-6xl group-hover:scale-110 transition-transform duration-300"
+          />
         </div>
       )}
       <div
